@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>고민중독 룰렛</title>
+<style>
+:root{--bg:#fff8f3;--card:#fff;--text:#2d211c;--muted:#806e65;--primary:#ff6b4a;--line:#efdfd7;--shadow:0 16px 40px rgba(78,43,27,.12)}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif;background:radial-gradient(circle at top left,#ffe7db 0,transparent 30%),linear-gradient(#fffaf7,var(--bg));color:var(--text)}
+button,input,textarea,select{font:inherit}.app{width:min(100%,500px);min-height:100vh;margin:auto;padding:20px 17px 38px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.brand{font-weight:900;font-size:19px;display:flex;align-items:center;gap:10px}.badge,.icon-btn{width:42px;height:42px;border:0;border-radius:14px;background:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(78,43,27,.1)}.icon-btn{cursor:pointer;font-size:18px}.screen{display:none}.screen.active{display:block}.hero-copy h1{font-size:31px;margin:0;letter-spacing:-1px}.hero-copy p{margin:8px 0 20px;color:var(--muted);font-size:14px;line-height:1.55}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(255,255,255,.62);padding:5px;border-radius:16px;margin:4px 0 18px}.tab{border:0;border-radius:12px;padding:11px;background:transparent;color:var(--muted);font-weight:900;cursor:pointer}.tab.active{background:#fff;color:var(--text);box-shadow:0 5px 14px rgba(78,43,27,.09)}.empty-state{text-align:center;background:rgba(255,255,255,.72);border:2px dashed #e8cfc3;border-radius:24px;padding:34px 20px}.empty-icon{font-size:52px}.empty-state h3{margin:10px 0 6px}.empty-state p{margin:0 0 18px;color:var(--muted);font-size:13px}.empty-create{border:0;border-radius:14px;padding:13px 17px;font-weight:900;cursor:pointer}.section-head{display:flex;align-items:center;justify-content:space-between;margin:22px 2px 12px}.section-head h2{margin:0;font-size:17px}.section-head small{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.roulette-card{border:1px solid rgba(255,255,255,.72);background:var(--card-theme,#fff);color:var(--card-text,#252126);border-radius:22px;padding:14px 13px 12px;min-height:244px;box-shadow:0 10px 24px rgba(78,43,27,.12);position:relative;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .16s ease}.roulette-card:active{transform:scale(.985)}.card-orb{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:31px;margin-bottom:14px;background:rgba(255,255,255,.82)!important;color:inherit!important;border:1px solid rgba(255,255,255,.78)}.roulette-card h3{margin:0 0 7px;padding-right:30px;font-size:18px;line-height:1.25;letter-spacing:-.35px;color:inherit;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.roulette-card p{margin:0;color:inherit;opacity:.8;font-size:12px;line-height:1.45;min-height:35px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.card-badge{align-self:flex-start;max-width:100%;margin-top:10px;padding:7px 9px;border-radius:999px;background:rgba(255,255,255,.8);color:#3e3739;font-size:10.5px;font-weight:900;box-shadow:inset 0 0 0 1px rgba(255,255,255,.42);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-stats{margin-top:auto;padding-top:11px;border-top:1px solid rgba(255,255,255,.5);display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:900;color:inherit}.card-stats span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}.card-menu{position:absolute;right:11px;top:11px;width:36px;height:36px;border:0;border-radius:12px;background:rgba(255,255,255,.82);color:#2d211c;cursor:pointer;font-size:19px;display:grid;place-items:center}.add-card{min-height:244px;border:2px dashed #e8cfc3;background:rgba(255,255,255,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px}.add-card .plus{font-size:34px;line-height:1;color:var(--primary)}.add-card h3{font-size:17px;margin:9px 0 6px;padding:0}.add-card p{font-size:11.5px;min-height:auto}
+.detail-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}.detail-head .back{flex:0 0 auto}.detail-title{min-width:0;flex:1}.detail-title h1{font-size:25px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.detail-title p{font-size:13px;color:var(--muted);margin:4px 0 0}.wheel-card{background:rgba(255,255,255,.88);border-radius:28px;padding:20px 17px 18px;box-shadow:var(--shadow)}.wheel-wrap{position:relative;width:min(82vw,350px);aspect-ratio:1;margin:6px auto 20px;filter:drop-shadow(0 15px 19px rgba(87,52,35,.17))}.pointer{position:absolute;z-index:4;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:34px solid #2d211c}.wheel-wrap canvas{width:100%;height:100%;display:block;border-radius:50%;background:#fff}.wheel-center{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:#fff;border:7px solid #2d211c;display:grid;place-items:center;font-size:28px}.spin-btn{width:100%;border:0;border-radius:18px;padding:17px;background:#2F343A;color:#fff;font-weight:900;font-size:18px;box-shadow:0 11px 24px rgba(47,52,58,.28);cursor:pointer;transition:background .18s,transform .18s}.spin-btn:hover{background:#252A2F}.spin-btn:active{background:#1F2328;transform:translateY(1px)}.spin-btn:disabled{opacity:.55}.detail-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.tool-btn{border:1px solid var(--line);background:#fff;border-radius:15px;padding:13px;font-weight:800;color:#684e43;cursor:pointer}.roulette-stats{display:flex;justify-content:center;gap:18px;margin:14px 0 2px;color:var(--muted);font-size:13px;font-weight:800}.roulette-stats span{display:inline-flex;align-items:center;gap:5px}.option-preview{margin-top:16px;background:rgba(255,255,255,.75);padding:16px;border-radius:21px}.option-preview h3{font-size:14px;margin:0 0 10px}.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{padding:8px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:12px;font-weight:700}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(35,24,19,.5);display:none;align-items:flex-end;justify-content:center;padding:14px}.modal.show{display:flex}.sheet{width:min(100%,480px);max-height:92vh;overflow:auto;background:#fff;border-radius:28px 28px 22px 22px;padding:23px 18px 18px;box-shadow:0 25px 65px rgba(0,0,0,.28)}.sheet h2{margin:0 0 18px;font-size:22px}.field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:900;margin-bottom:7px;color:#634c42}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;outline:none;background:#fffdfb}.field textarea{min-height:155px;resize:vertical;line-height:1.6}.form-row{display:grid;grid-template-columns:92px 1fr;gap:10px}.color-input{height:48px;padding:5px!important}.help{font-size:11px;color:var(--muted);margin-top:6px}.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.sheet-actions button{border:0;border-radius:15px;padding:14px;font-weight:900;cursor:pointer}.secondary{background:#f4eee9;color:#614c42}.primary{background:var(--primary);color:#fff}.danger{background:#fff0ec;color:#d94d33}.result{text-align:center;background:#fff;color:#2d211c}.result p,.result div{color:inherit!important}.result .secondary{background:#f1f2f4;color:#2d211c}.result .primary{background:#2f343a;color:#fff}.result .primary:active{background:#1f2328}.result .emoji{font-size:58px}.result h2{font-size:34px;margin:7px 0}.result p{color:#7b716c!important;margin:0 0 18px}.full{grid-column:1/-1}.toast{position:fixed;left:50%;bottom:24px;z-index:30;transform:translateX(-50%) translateY(15px);opacity:0;background:#2f241f;color:#fff;border-radius:999px;padding:11px 15px;font-size:13px;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:360px){.app{padding-left:12px;padding-right:12px}.cards{gap:9px}.roulette-card{min-height:232px;padding:12px 11px 11px;border-radius:20px}.card-orb{width:52px;height:52px;font-size:28px;border-radius:16px}.roulette-card h3{font-size:16px}.roulette-card p{font-size:11px}.card-badge{font-size:9.5px;padding:6px 8px}.card-stats{font-size:10.5px;gap:7px}.card-menu{right:9px;top:9px;width:33px;height:33px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="topbar">
+    <div class="brand"><span class="badge">🌀</span> 고민중독 룰렛</div>
+    <button class="icon-btn" id="soundBtn">🔊</button>
+  </div>
+
+  <section id="homeScreen" class="screen active">
+    <div class="hero-copy"><h1>결정하기 어려울 땐<br>룰렛에게 맡겨봐!</h1><p>필요한 룰렛을 골라 돌리거나, 나만의 룰렛을 직접 만들어보세요.</p></div>
+    <div class="tabs"><button class="tab active" data-tab="mine">내 룰렛</button><button class="tab" data-tab="all">전체 룰렛</button></div>
+    <div class="section-head"><h2 id="listTitle">내 룰렛</h2><small id="rouletteCount"></small></div>
+    <div class="cards" id="rouletteCards"></div>
+    <div class="empty-state" id="emptyState" hidden><div class="empty-icon">🎡</div><h3>아직 만든 룰렛이 없어요</h3><p>첫 번째 룰렛을 만들어 고민을 맡겨보세요.</p><button class="primary empty-create" id="emptyCreateBtn">＋ 새 룰렛 만들기</button></div>
+  </section>
+
+  <section id="detailScreen" class="screen">
+    <div class="detail-head">
+      <button class="icon-btn back" id="backBtn">←</button>
+      <div class="detail-title"><h1 id="detailName"></h1><p id="detailDescription"></p></div>
+      <button class="icon-btn" id="editBtn">✏️</button>
+    </div>
+    <div class="wheel-card">
+      <div class="wheel-wrap"><div class="pointer"></div><canvas id="wheel" width="700" height="700"></canvas><div class="wheel-center" id="wheelCenter"></div></div>
+      <button class="spin-btn" id="spinBtn">룰렛 돌리기</button>
+      <div class="roulette-stats"><span id="likeStat">♡ 0</span><span id="playStat">▶ 0회</span></div><div class="detail-tools"><button class="tool-btn" id="favoriteBtn">☆ 즐겨찾기</button><button class="tool-btn" id="likeBtn">♡ 좋아요</button><button class="tool-btn" id="shareBtn">📤 SNS 공유</button></div>
+    </div>
+    <div class="option-preview"><h3>룰렛 항목 <span id="optionCount"></span></h3><div class="chips" id="optionChips"></div></div>
+  </section>
+</main>
+
+<div class="modal" id="editModal"><div class="sheet">
+  <h2 id="editorTitle">새 룰렛 만들기</h2>
+  <div class="form-row">
+    <div class="field"><label>아이콘</label><input id="iconInput" maxlength="4" placeholder="🎯"></div>
+    <div class="field"><label>룰렛 이름</label><input id="nameInput" maxlength="30" placeholder="예: 오늘 뭐 먹지?"></div>
+  </div>
+  <div class="field"><label>설명</label><input id="descriptionInput" maxlength="80" placeholder="룰렛을 간단히 설명해 주세요."></div>
+  <div class="field"><label>테마색</label><input class="color-input" id="colorInput" type="color" value="#ff6b4a"></div>
+  <div class="field"><label>공개 설정</label><select id="visibilityInput"><option value="public">전체 공개</option><option value="unlisted">링크 공개</option><option value="private">나만 보기</option></select><div class="help">서버 업로드 시 공개 범위를 함께 저장합니다.</div></div>
+  <div class="field"><label>룰렛 항목</label><textarea id="optionsInput" placeholder="한 줄에 하나씩 입력하세요.\n치킨\n피자\n햄버거"></textarea><div class="help">최소 2개 항목이 필요합니다. 이모지도 함께 적을 수 있어요.</div></div>
+  <div class="sheet-actions"><button class="secondary" id="cancelEditBtn">취소</button><button class="primary" id="saveBtn">저장하기</button><button class="secondary full" id="duplicateBtn" style="display:none">내 룰렛으로 복제</button><button class="danger full" id="deleteBtn" style="display:none">이 룰렛 삭제</button></div>
+</div></div>
+
+<div class="modal" id="resultModal"><div class="sheet result">
+  <div class="emoji" id="resultEmoji">🎉</div><div style="font-size:13px;color:var(--muted)">룰렛의 선택은</div><h2 id="resultText"></h2><p id="resultMessage"></p>
+  <div class="sheet-actions"><button class="secondary" id="closeResultBtn">닫기</button><button class="primary" id="retryBtn">다시 돌리기</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY='gominRouletteDataV3';
+// 실제 앱에서는 로그인 세션/토큰에서 주입하세요.
+const CURRENT_USER={id:'demo-user-001',nickname:'나'};
+const DEFAULTS=[];
+const RAINBOW_COLORS=['#FF6B6B','#FF9F43','#FFD93D','#6BCB77','#00C49A','#4D96FF','#3A86FF','#9B5DE5','#F15BB5','#00BBF9','#90BE6D','#F3722C'];
+let currentTab='mine';
+let roulettes=loadData();let activeId=null;let editingId=null;let rotation=0;let spinning=false;let soundOn=true;
+const $=id=>document.getElementById(id);const home=$('homeScreen'),detail=$('detailScreen'),canvas=$('wheel'),ctx=canvas.getContext('2d');
+function normalizeRoulette(r){return {...r,ownerId:r.ownerId||(r.builtIn?'system':CURRENT_USER.id),ownerName:r.ownerName||(r.builtIn?'고민중독':CURRENT_USER.nickname),visibility:r.visibility||'public',isFavorite:!!r.isFavorite,likedByMe:!!r.likedByMe,likeCount:Number(r.likeCount)||0,playCount:Number(r.playCount)||0}}
+function loadData(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY))||JSON.parse(localStorage.getItem('gominRouletteDataV2'))||[];return Array.isArray(saved)?saved.map(normalizeRoulette).filter(r=>!r.builtIn&&r.ownerId!=='system'):[]}catch{return []}}
+function saveData(){localStorage.setItem(STORAGE_KEY,JSON.stringify(roulettes))}
+function isOwner(r){return !!r&&r.ownerId===CURRENT_USER.id}
+function visibilityLabel(v){return v==='private'?'나만 보기':v==='unlisted'?'링크 공개':'전체 공개'}
+function shade(hex,amt){let n=parseInt(hex.slice(1),16),r=Math.max(0,Math.min(255,(n>>16)+amt)),g=Math.max(0,Math.min(255,((n>>8)&255)+amt)),b=Math.max(0,Math.min(255,(n&255)+amt));return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('')}
+function contrastText(hex){const c=hex.replace('#','');const r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return (r*299+g*587+b*114)/1000>165?'#2d211c':'#ffffff'}
+function renderCards(){const box=$('rouletteCards');box.innerHTML='';const visible=(currentTab==='mine'?roulettes.filter(isOwner):roulettes.filter(r=>r.visibility==='public')).sort((a,b)=>Number(b.isFavorite)-Number(a.isFavorite)||new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0));$('listTitle').textContent=currentTab==='mine'?'내 룰렛':'전체 룰렛';$('rouletteCount').textContent=`${visible.length}개`;
+ visible.forEach(r=>{const mine=isOwner(r);const c=document.createElement('article');c.className='roulette-card';c.style.setProperty('--card-theme',r.color);c.style.setProperty('--card-text',contrastText(r.color));c.innerHTML=`<button class="card-menu" aria-label="${mine?'수정':'복제'}">${mine?'⋮':'＋'}</button><div class="card-orb">${r.icon}</div><h3>${esc(r.name)}</h3><p>${esc(r.description||'나만의 선택 룰렛')}</p><div class="card-badge">${r.isFavorite?'★ ':''}${mine?'내 룰렛':esc(r.ownerName)} · ${r.options.length}개</div><div class="card-stats"><span>♡ ${r.likeCount||0}</span><span>▶ ${r.playCount||0}회</span></div>`;c.addEventListener('click',()=>openRoulette(r.id));c.querySelector('.card-menu').addEventListener('click',e=>{e.stopPropagation();mine?openEditor(r.id):duplicateRoulette(r.id)});box.appendChild(c)});
+ if(currentTab==='mine'){const add=document.createElement('article');add.className='roulette-card add-card';add.innerHTML='<div class="plus">＋</div><h3>새 룰렛 추가</h3><p>내 고민에 맞는 룰렛을 직접 만들기</p>';add.onclick=()=>openEditor(null);box.appendChild(add)}const empty=$('emptyState');empty.hidden=visible.length>0||currentTab==='mine';if(currentTab==='mine'&&visible.length===0){box.innerHTML='';empty.hidden=false}else if(currentTab==='all'&&visible.length===0){box.innerHTML='<div class="empty-state full"><div class="empty-icon">🌐</div><h3>아직 공개된 룰렛이 없어요</h3><p>룰렛을 전체 공개로 저장하면 이곳에 함께 표시됩니다.</p></div>';empty.hidden=true}}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function active(){return roulettes.find(r=>r.id===activeId)}
+function openRoulette(id){activeId=id;rotation=0;home.classList.remove('active');detail.classList.add('active');renderDetail()}
+function renderDetail(){const r=active();if(!r)return;$('detailName').textContent=r.name;$('detailDescription').textContent=`${r.description||''} · ${visibilityLabel(r.visibility)}`;$('wheelCenter').textContent=r.icon;$('optionCount').textContent=`(${r.options.length}개)`;$('optionChips').innerHTML=r.options.map(o=>`<span class="chip">${esc(o)}</span>`).join('');document.documentElement.style.setProperty('--primary',r.color);const mine=isOwner(r);$('editBtn').textContent=mine?'✏️':'📄';$('editBtn').title=mine?'내 룰렛 수정':'내 룰렛으로 복제';$('favoriteBtn').textContent=r.isFavorite?'★ 즐겨찾기 해제':'☆ 즐겨찾기';$('favoriteBtn').setAttribute('aria-pressed',String(r.isFavorite));$('likeStat').textContent=`♡ ${r.likeCount||0}`;$('playStat').textContent=`▶ ${r.playCount||0}회`;$('likeBtn').hidden=r.visibility!=='public';$('likeBtn').textContent=r.likedByMe?`♥ 좋아요 ${r.likeCount||0}`:`♡ 좋아요 ${r.likeCount||0}`;$('likeBtn').setAttribute('aria-pressed',String(r.likedByMe));drawWheel()}
+function drawWheel(){const r=active();if(!r)return;const opts=r.options,cx=350,cy=350,rad=342,slice=Math.PI*2/opts.length;ctx.clearRect(0,0,700,700);ctx.save();ctx.translate(cx,cy);ctx.rotate(rotation);opts.forEach((o,i)=>{const start=i*slice-Math.PI/2,end=start+slice;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,rad,start,end);ctx.closePath();ctx.fillStyle=RAINBOW_COLORS[i%RAINBOW_COLORS.length];ctx.fill();ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=4;ctx.stroke();ctx.save();ctx.rotate(start+slice/2);ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.32)';ctx.shadowBlur=5;ctx.font=`800 ${opts.length>14?22:opts.length>9?25:29}px Pretendard,sans-serif`;let label=o.length>13?o.slice(0,12)+'…':o;ctx.fillText(label,rad-26,0);ctx.restore()});ctx.restore();ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=10;ctx.stroke()}
+function norm(a){const f=Math.PI*2;return((a%f)+f)%f}
+function selectedIndex(){
+ const opts=active().options;
+ const slice=Math.PI*2/opts.length;
+ const pointerAngle=-Math.PI/2; // 화면 위쪽 포인터의 캔버스 기준각
+ const firstSectorStart=-Math.PI/2; // drawWheel()에서 0번 섹터가 시작되는 각도
+ // 원판은 양의 rotation 값으로 시계 방향 회전한다. 따라서 고정된
+ // 포인터 아래의 원판 좌표는 pointerAngle - rotation으로 역회전한다.
+ const wheelAngleAtPointer=norm(pointerAngle-rotation);
+ const relativeToFirstSector=norm(wheelAngleAtPointer-firstSectorStart);
+ return Math.min(opts.length-1,Math.floor(relativeToFirstSector/slice));
+}
+function spin(){if(spinning)return;spinning=true;$('spinBtn').disabled=true;$('spinBtn').textContent='돌아가는 중...';const start=rotation,target=start+(5+Math.random()*3)*Math.PI*2+Math.random()*Math.PI*2,duration=3300,t0=performance.now();function ani(now){const t=Math.min((now-t0)/duration,1),ease=1-Math.pow(1-t,4);rotation=start+(target-start)*ease;drawWheel();if(t<1)requestAnimationFrame(ani);else{rotation=norm(rotation);drawWheel();spinning=false;$('spinBtn').disabled=false;$('spinBtn').textContent='룰렛 돌리기';if(soundOn&&navigator.vibrate)navigator.vibrate([60,35,90]);recordPlay();showResult(active().options[selectedIndex()])}}requestAnimationFrame(ani)}
+function showResult(text){const r=active();$('resultEmoji').textContent='🎯';$('resultText').textContent=text;$('resultMessage').textContent=['첫 선택이 운명일지도 몰라요.','고민 종료! 이제 실행할 시간이에요.','룰렛이 대신 결정해 줬어요.','다시 돌려도 이게 자꾸 생각날걸요?'][Math.floor(Math.random()*4)];$('resultModal').classList.add('show')}
+function openEditor(id){editingId=id;const r=id?roulettes.find(x=>x.id===id):null;if(r&&!isOwner(r)){duplicateRoulette(id);return}$('editorTitle').textContent=r?'내 룰렛 모든 사항 수정':'새 룰렛 만들기';$('iconInput').value=r?.icon||'🎯';$('nameInput').value=r?.name||'';$('descriptionInput').value=r?.description||'';$('colorInput').value=r?.color||'#ff6b4a';$('visibilityInput').value=r?.visibility||'public';$('optionsInput').value=r?.options.join('\n')||'';$('deleteBtn').style.display=r?'block':'none';$('duplicateBtn').style.display='none';$('editModal').classList.add('show')}
+function closeEditor(){$('editModal').classList.remove('show')}
+async function persistToServer(method,roulette){
+ // 연동 예시: return fetch(`/api/roulettes/${roulette.id||''}`, {method,headers:{'Content-Type':'application/json','Authorization':'Bearer <token>'},body:JSON.stringify(roulette)});
+ // 서버는 반드시 토큰의 userId와 roulette.ownerId를 비교해 수정/삭제 권한을 검증해야 합니다.
+ return Promise.resolve({ok:true});
+}
+async function saveEditor(){const name=$('nameInput').value.trim(),description=$('descriptionInput').value.trim(),icon=$('iconInput').value.trim()||'🎯',color=$('colorInput').value,visibility=$('visibilityInput').value,options=$('optionsInput').value.split('\n').map(x=>x.trim()).filter(Boolean);if(!name)return toastMsg('룰렛 이름을 입력해 주세요.');if(options.length<2)return toastMsg('항목을 2개 이상 입력해 주세요.');let target;if(editingId){target=roulettes.find(x=>x.id===editingId);if(!isOwner(target))return toastMsg('본인이 만든 룰렛만 수정할 수 있어요.');Object.assign(target,{name,description,icon,color,visibility,options,updatedAt:new Date().toISOString()});await persistToServer('PUT',target)}else{target={id:'r-'+Date.now(),name,description,icon,color,visibility,options,builtIn:false,isFavorite:false,likedByMe:false,likeCount:0,playCount:0,ownerId:CURRENT_USER.id,ownerName:CURRENT_USER.nickname,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};roulettes.push(target);await persistToServer('POST',target)}saveData();renderCards();closeEditor();toastMsg(editingId?'모든 사항을 수정했어요.':'새 룰렛을 만들었어요.');if(editingId===activeId)renderDetail()}
+async function deleteEditor(){const r=roulettes.find(x=>x.id===editingId);if(!r)return;if(!isOwner(r))return toastMsg('본인이 만든 룰렛만 삭제할 수 있어요.');if(!confirm(`'${r.name}' 룰렛을 삭제할까요?`))return;await persistToServer('DELETE',r);roulettes=roulettes.filter(x=>x.id!==editingId);saveData();closeEditor();renderCards();if(activeId===editingId){detail.classList.remove('active');home.classList.add('active');activeId=null}toastMsg('룰렛을 삭제했어요.')}
+function duplicateRoulette(id){const source=roulettes.find(x=>x.id===id);if(!source)return;const copy={...structuredClone(source),id:'r-'+Date.now(),name:`${source.name} 복사본`,isFavorite:false,likedByMe:false,likeCount:0,playCount:0,ownerId:CURRENT_USER.id,ownerName:CURRENT_USER.nickname,builtIn:false,visibility:'private',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};roulettes.push(copy);saveData();renderCards();toastMsg('내 룰렛으로 복제했어요. 이제 전부 수정할 수 있어요.');openEditor(copy.id)}
+
+async function toggleFavorite(){
+ const r=active();if(!r)return;
+ r.isFavorite=!r.isFavorite;r.updatedAt=new Date().toISOString();
+ saveData();renderDetail();renderCards();
+ try{await persistToServer('PATCH',{id:r.id,isFavorite:r.isFavorite})}catch{}
+ toastMsg(r.isFavorite?'즐겨찾기에 추가했어요. 목록 상단에 고정됩니다.':'즐겨찾기에서 해제했어요.');
+}
+
+async function toggleLike(){
+ const r=active();if(!r)return;
+ if(r.visibility!=='public')return toastMsg('전체 공개 룰렛만 좋아요를 누를 수 있어요.');
+ r.likedByMe=!r.likedByMe;
+ r.likeCount=Math.max(0,(Number(r.likeCount)||0)+(r.likedByMe?1:-1));
+ saveData();renderDetail();renderCards();
+ try{await persistToServer('PATCH',{id:r.id,action:'like',liked:r.likedByMe})}catch{}
+ toastMsg(r.likedByMe?'좋아요를 눌렀어요.':'좋아요를 취소했어요.');
+}
+async function recordPlay(){
+ const r=active();if(!r)return;
+ r.playCount=(Number(r.playCount)||0)+1;
+ saveData();renderDetail();renderCards();
+ try{await persistToServer('PATCH',{id:r.id,action:'play'})}catch{}
+}
+
+async function shareRoulette(){
+ const r=active();if(!r)return;
+ const url=location.protocol.startsWith('http')?`${location.origin}${location.pathname}?roulette=${encodeURIComponent(r.id)}`:location.href;
+ const text=`🎯 ${r.name}
+${r.description||'고민은 룰렛에게 맡겨보세요.'}
+선택지 ${r.options.length}개`;
+ try{
+  if(navigator.share){await navigator.share({title:r.name,text,url});toastMsg('공유했어요.');return}
+  await navigator.clipboard.writeText(`${text}
+${url}`);toastMsg('공유 링크를 복사했어요.');
+ }catch(e){if(e&&e.name!=='AbortError')toastMsg('공유하지 못했어요.');}
+}
+
+function toastMsg(m){$('toast').textContent=m;$('toast').classList.add('show');clearTimeout(toastMsg.t);toastMsg.t=setTimeout(()=>$('toast').classList.remove('show'),1600)}
+$('backBtn').onclick=()=>{detail.classList.remove('active');home.classList.add('active');document.documentElement.style.setProperty('--primary','#ff6b4a')};$('spinBtn').onclick=spin;$('editBtn').onclick=()=>{const r=active();isOwner(r)?openEditor(activeId):duplicateRoulette(activeId)};$('favoriteBtn').onclick=toggleFavorite;$('likeBtn').onclick=toggleLike;$('cancelEditBtn').onclick=closeEditor;$('saveBtn').onclick=saveEditor;$('deleteBtn').onclick=deleteEditor;$('duplicateBtn').onclick=()=>duplicateRoulette(editingId);$('closeResultBtn').onclick=()=>$('resultModal').classList.remove('show');$('retryBtn').onclick=()=>{$('resultModal').classList.remove('show');setTimeout(spin,120)};$('shareBtn').onclick=shareRoulette;$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'🔊':'🔇';toastMsg(soundOn?'진동 효과를 켰어요.':'진동 효과를 껐어요.')};$('editModal').onclick=e=>{if(e.target===$('editModal'))closeEditor()};$('resultModal').onclick=e=>{if(e.target===$('resultModal'))$('resultModal').classList.remove('show')};
+document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{currentTab=btn.dataset.tab;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===btn));renderCards()});$('emptyCreateBtn').onclick=()=>openEditor(null);
+renderCards();
+</script>
+</body>
+</html>
