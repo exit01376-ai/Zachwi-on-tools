@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>자취 시뮬레이터 v22</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:#f4f6f8;color:#111827}
+button,input,textarea,select{font:inherit}.hidden{display:none!important}.top{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:20}
+.top h1{margin:0;font-size:20px}.top p{margin:3px 0 0;color:#6b7280;font-size:13px}.top>div{flex:1}
+.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer;background:#2563eb;color:#fff}.btn.sub{background:#eef2f7;color:#111827}.btn.danger{background:#fee2e2;color:#991b1b}.btn.small{padding:7px 10px;font-size:13px}
+main{max-width:1180px;margin:auto;padding:18px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.episode-card{width:100%;min-height:72px;display:flex;align-items:stretch;background:#eef4ff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 3px 12px #0f172a0a;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.episode-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px #0f172a12;border-color:#bfdbfe}
+.episode-play{flex:1;border:0;background:transparent;padding:18px 22px;cursor:pointer;text-align:left;color:#1e3a5f;font-size:19px;font-weight:800;line-height:1.4}
+.episode-play:focus-visible,.tip-button:focus-visible{outline:3px solid #93c5fd;outline-offset:-3px}
+.tip-button{align-self:center;flex:0 0 auto;border:0;border-radius:999px;background:#2563eb;color:#fff;margin-right:16px;padding:9px 17px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 9px #2563eb33}
+.tip-button:hover{background:#1d4ed8;transform:translateY(-1px)}
+.tip-button:active{transform:translateY(0)}
+.card,.panel{background:#fff;border:1px solid #e5e7eb;border-radius:17px;overflow:hidden}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#dbeafe}
+.body{padding:15px}.body h3{margin:6px 0}.body p{margin:5px 0 13px;color:#6b7280;min-height:42px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.panel{padding:20px}.admin-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:13px;border:1px solid #e5e7eb;border-radius:13px;margin-top:10px}
+.upload input{display:none}.empty{text-align:center;color:#6b7280;padding:80px 10px}
+.modal{position:fixed;inset:0;z-index:100;background:#0009;display:grid;place-items:center;padding:14px}.modal-card{width:min(96vw,1020px);max-height:94vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:13px;font-weight:750;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.field textarea{min-height:90px;resize:vertical}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{background:#eef2f7;color:#374151}.tab.active{background:#2563eb;color:#fff}
+.asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.asset-card{border:1px solid #e5e7eb;border-radius:13px;padding:12px}.asset-preview{width:100%;height:150px;object-fit:contain;background:#eef2f7;border-radius:10px;margin:8px 0}.asset-id{font-weight:800;word-break:break-all}
+.scene-card{border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin:12px 0}.scene-card.active{outline:3px solid #bfdbfe}.preview-box{border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#111;position:relative;aspect-ratio:16/9;margin:14px 0}.preview-box img.bg{width:100%;height:100%;object-fit:cover}.preview-box img.char{position:absolute;left:50%;bottom:0;transform:translateX(-50%);max-height:85%;max-width:70%;object-fit:contain}
+.preview-reference{position:absolute;object-fit:contain;cursor:move;z-index:4;user-select:none;touch-action:none}
+.preview-reference.selected{outline:2px dashed #60a5fa;outline-offset:2px}
+.reference-handle{position:absolute;width:18px;height:18px;border-radius:50%;background:#2563eb;border:2px solid #fff;z-index:6;cursor:nwse-resize;touch-action:none;box-shadow:0 1px 5px #0005}
+.reference-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;margin:-4px 0 14px}
+.scene-preview-panel{margin:0 0 18px;padding:14px;background:#f8fafc;border:1px solid #dbe3ee;border-radius:16px;box-shadow:0 5px 16px #0f172a0d}
+.reference-controls label{font-size:12px;font-weight:750;color:#475569}
+.reference-controls input{width:100%}
+.player-reference{position:absolute;object-fit:contain;z-index:4;pointer-events:none}
+.preview-dialog{position:absolute;left:4%;right:4%;bottom:4%;background:#111d;color:#fff;border-radius:12px;padding:12px}.preview-dialog strong{color:#bfdbfe}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.scene-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.notice{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px;color:#92400e;margin:12px 0}
+.player{position:fixed;inset:0;background:#111;z-index:80}.player-bg{width:100%;height:100%;object-fit:cover}.player-char{position:absolute;left:50%;bottom:0;transform:translateX(-50%);max-height:84%;max-width:76%;object-fit:contain}
+.dialog{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(94%,900px);background:rgba(17,17,17,.6);color:#fff;border:1px solid #ffffff55;border-radius:16px;padding:17px;transition:padding .18s ease,max-height .18s ease}.speaker{font-weight:800;color:#bfdbfe}.dialog-text{font-size:18px;line-height:1.55;margin-top:7px}
+.player-tools{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;z-index:10}.player-tools button{background:#000b;color:#fff}.player-nav{display:flex;gap:8px}.player-tools button:disabled{opacity:.42;cursor:not-allowed}
+.choice-wrap{display:grid;gap:5px;margin-top:8px}.choice{width:100%;text-align:left;padding:9px 12px;min-height:0}.dialog.choice-mode{padding:11px 17px;max-height:61vh}.dialog.choice-mode .dialog-text{font-size:17px;line-height:1.38;margin-top:4px}.dialog.choice-mode .choice-wrap{gap:5px;margin-top:7px}.dialog.choice-mode .choice{padding:8px 12px}
+.version-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.version-btn{padding:18px;font-size:17px}
+.tip-list{display:grid;gap:10px;margin:14px 0}.tip-item{background:#fff;color:#111827;border-radius:12px;padding:12px 14px;line-height:1.5}
+.end-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.auto-save{font-size:12px;color:#047857;font-weight:750;margin-top:6px}
+@media(max-width:700px){.episode-card{min-height:64px}.episode-play{padding:15px 17px;font-size:17px}.tip-button{margin-right:10px;padding:8px 13px;font-size:14px}.form-grid{grid-template-columns:1fr}.admin-item{grid-template-columns:1fr}.modal-card{padding:14px}.asset-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button id="backBtn" class="btn sub hidden">←</button>
+  <div><h1 id="pageTitle">자취 시뮬레이터</h1><p id="pageSub"></p></div>
+  <button id="adminBtn" class="btn sub">⚙ 관리자</button>
+</header>
+
+<main>
+<section id="listView">
+  <div id="empty" class="empty hidden">등록된 에피소드가 없습니다.<br>관리자에서 JSON 파일을 업로드하세요.</div>
+  <div id="episodeGrid" class="grid"></div>
+</section>
+
+<section id="adminView" class="hidden">
+  <div class="panel">
+    <div class="row" style="justify-content:space-between">
+      <div><h2 style="margin:0">에피소드 관리</h2><p style="margin:6px 0;color:#6b7280">JSON 업로드 · 장면별 편집 · 공통 자산 관리</p></div>
+      <label class="btn upload">에피소드 JSON 업로드<input id="jsonInput" type="file" accept=".json,application/json" multiple></label>
+    </div>
+    <div class="notice">같은 배경 ID 또는 캐릭터 ID를 여러 장면에서 사용하면 이미지를 한 번만 업로드해도 모든 장면에 자동 적용됩니다.</div>
+    <div id="adminList"></div>
+  </div>
+</section>
+</main>
+
+<section id="player" class="player hidden">
+  <img id="playerBg" class="player-bg" alt="">
+  <img id="playerChar" class="player-char hidden" alt=""><img id="playerReference" class="player-reference hidden" alt="">
+  <div class="player-tools">
+    <button id="closePlayer" class="btn">목록으로</button>
+    <div class="player-nav">
+      <button id="previousScene" class="btn">← 이전 장면</button>
+      <button id="restartPlayer" class="btn">처음부터</button>
+    </div>
+  </div>
+  <div id="dialog" class="dialog">
+    <div id="speaker" class="speaker"></div>
+    <div id="dialogText" class="dialog-text"></div>
+    <div id="choiceWrap" class="choice-wrap"></div>
+  </div>
+</section>
+
+<div id="loginModal" class="modal hidden"><div class="modal-card" style="max-width:420px"><h2>관리자 로그인</h2><div class="field"><input id="password" type="password" inputmode="numeric" placeholder="비밀번호"></div><p id="loginError" style="color:#dc2626" class="hidden">비밀번호가 올바르지 않습니다.</p><div class="row" style="justify-content:flex-end;margin-top:14px"><button id="cancelLogin" class="btn sub">취소</button><button id="confirmLogin" class="btn">확인</button></div></div></div>
+
+<div id="versionModal" class="modal hidden">
+  <div class="modal-card" style="max-width:520px">
+    <h2 style="margin-top:0">버전을 선택하세요</h2>
+    <p style="color:#6b7280">플레이할 주인공 버전을 선택합니다.</p>
+    <div id="versionButtons" class="version-grid"></div>
+  </div>
+</div>
+
+<div id="editorModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="row" style="justify-content:space-between">
+      <div><h2 id="editorTitle" style="margin:0">에피소드 편집</h2><p style="margin:5px 0;color:#6b7280">장면과 공통 자산을 수정합니다.</p></div>
+      <div class="row">
+        <button id="saveEpisode" class="btn">저장</button>
+        <button id="closeEditor" class="btn sub">닫기</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="btn tab active" data-tab="info">기본 정보</button>
+      <button class="btn tab" data-tab="assets">배경·캐릭터</button>
+      <button class="btn tab" data-tab="scenes">장면별 편집</button>
+    </div>
+    <section id="tabInfo">
+      <div class="form-grid">
+        <div class="field"><label>에피소드 ID</label><input id="editId"></div>
+        <div class="field"><label>에피소드 번호</label><input id="editEpisodeNumber" type="number" min="1" step="1"></div>
+        <div class="field"><label>게임 제목</label><input id="editTitle"></div>
+        <div class="field"><label>목록 카드 문구</label><input id="editCardTitle" placeholder="Episode 1. 수상하게 좋은 원룸"></div>
+        <div class="field" style="grid-column:1/-1"><label>설명</label><textarea id="editDescription"></textarea></div>
+      </div>
+    </section>
+    <section id="tabAssets" class="hidden">
+      <div class="row" style="justify-content:space-between"><h3>배경</h3><button id="addBackground" class="btn sub small">배경 ID 추가</button></div>
+      <div id="backgroundAssets" class="asset-grid"></div>
+      <div class="row" style="justify-content:space-between;margin-top:18px"><h3>캐릭터</h3><button id="addCharacter" class="btn sub small">캐릭터 ID 추가</button></div>
+      <div id="characterAssets" class="asset-grid"></div>
+    </section>
+    <section id="tabScenes" class="hidden">
+      <div class="row" style="justify-content:space-between">
+        <div class="field"><label>버전</label><select id="versionSelect"></select></div>
+        <div class="row"><button id="copyVersion" class="btn sub">다른 버전으로 복사</button><button id="addScene" class="btn sub">장면 추가</button></div>
+      </div>
+      <div class="toolbar"><button id="validateJson" class="btn sub small">JSON 검사</button><button id="exportCurrent" class="btn sub small">현재 JSON 저장</button></div>
+      <div id="scenePreviewPanel" class="scene-preview-panel hidden">
+        <div id="scenePreview" class="preview-box">
+          <img id="previewBg" class="bg">
+          <img id="previewChar" class="char hidden">
+          <img id="previewReference" class="preview-reference hidden" draggable="false">
+          <div id="referenceHandle" class="reference-handle hidden"></div>
+          <div class="preview-dialog"><strong id="previewSpeaker"></strong><div id="previewText"></div></div>
+        </div>
+        <div id="referenceControls" class="reference-controls hidden">
+          <label>가로 위치 <span id="refXValue">50%</span><input id="refX" type="range" min="0" max="100" step="1"></label>
+          <label>세로 위치 <span id="refYValue">45%</span><input id="refY" type="range" min="0" max="100" step="1"></label>
+          <label>크기 <span id="refWValue">35%</span><input id="refW" type="range" min="8" max="90" step="1"></label>
+        </div>
+      </div>
+      <div id="sceneList"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+let episodes=[],adminUnlocked=false,editing=null,currentVersion="default",playing=null,playScenes=[],sceneIndex=0,previewScene=null,previewSceneIndex=-1,pendingTipMode=false;
+
+const DB={
+  open(){return new Promise((resolve,reject)=>{const req=indexedDB.open("jachwiJsonLauncherV4",1);req.onupgradeneeded=()=>req.result.createObjectStore("episodes",{keyPath:"episodeId"});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})},
+  async op(mode,fn){const db=await this.open();return new Promise((resolve,reject)=>{const req=fn(db.transaction("episodes",mode).objectStore("episodes"));req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})},
+  all(){return this.op("readonly",s=>s.getAll())},get(id){return this.op("readonly",s=>s.get(id))},put(v){return this.op("readwrite",s=>s.put(v))},del(id){return this.op("readwrite",s=>s.delete(id))}
+};
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function episodeNumberOf(ep){
+  const direct=Number(ep.episodeNumber);
+  if(Number.isFinite(direct)&&direct>0)return direct;
+  const source=[ep.episodeId,ep.title].filter(Boolean).join(" ");
+  const m=source.match(/(?:episode|에피소드)\s*0*(\d+)/i);
+  return m?Number(m[1]):9999;
+}
+function episodeLabelOf(ep){
+  const n=episodeNumberOf(ep);
+  return n===9999?"EPISODE":`EPISODE ${String(n).padStart(2,"0")}`;
+}
+function cardTitleOf(ep){
+  const custom=String(ep.cardTitle??"").trim();
+  if(custom)return custom;
+  const n=episodeNumberOf(ep);
+  const raw=String(ep.title||ep.episodeId||"에피소드").trim();
+  const clean=raw.replace(/^(?:episode|에피소드)\s*0*\d+\s*[.:\-]?\s*/i,"").trim()||raw;
+  return n===9999?clean:`Episode ${n}. ${clean}`;
+}
+function ensureEpisode(ep){
+  ep.episodeId=ep.episodeId||("에피소드_"+Date.now());
+  ep.title=ep.title||ep.episodeId;
+  ep.episodeNumber=episodeNumberOf(ep);
+  if(ep.order==null&&ep.episodeNumber!==9999)ep.order=ep.episodeNumber;
+  ep.description=ep.description||"";
+  ep.cardTitle=String(ep.cardTitle??"").trim()||cardTitleOf(ep);
+  ep.assets=ep.assets||{};
+  ep.assets.backgrounds=ep.assets.backgrounds||{};
+  ep.assets.characters=ep.assets.characters||{};
+  ep.sharedSceneReferences=ep.sharedSceneReferences||{};
+  ep.sharedSceneContent=ep.sharedSceneContent||{};
+  if(ep.versions){
+    for(const k of Object.keys(ep.versions)){
+      ep.versions[k]=ep.versions[k]||{};
+      ep.versions[k].scenes=ep.versions[k].scenes||[];
+    }
+  }else ep.scenes=ep.scenes||[];
+
+  // 같은 순번의 장면 대사와 선택지 문구를 모든 버전이 공유하도록 이관한다.
+  const versionSceneGroups=ep.versions
+    ? Object.keys(ep.versions).map(k=>ep.versions[k].scenes||[])
+    : [ep.scenes||[]];
+  const maxSceneCount=Math.max(0,...versionSceneGroups.map(scenes=>scenes.length));
+
+  for(let i=0;i<maxSceneCount;i++){
+    const key="scene_"+i;
+    const sourceScene=versionSceneGroups.map(scenes=>scenes[i]).find(Boolean);
+    if(!sourceScene)continue;
+
+    if(!ep.sharedSceneContent[key]){
+      ep.sharedSceneContent[key]={
+        text:String(sourceScene.text??sourceScene.dialogue??""),
+        prompt:String(sourceScene.prompt??""),
+        choices:Array.isArray(sourceScene.choices)
+          ? sourceScene.choices.map(choice=>({
+              text:String(choice?.text??choice?.label??""),
+              result:String(choice?.result??"")
+            }))
+          : []
+      };
+    }
+
+    const shared=ep.sharedSceneContent[key];
+    versionSceneGroups.forEach(scenes=>{
+      const scene=scenes[i];
+      if(!scene)return;
+      scene.text=String(shared.text??"");
+      if("dialogue" in scene)scene.dialogue=scene.text;
+
+      if(shared.prompt||"prompt" in scene)scene.prompt=String(shared.prompt??"");
+
+      if(Array.isArray(shared.choices)&&shared.choices.length){
+        const oldChoices=Array.isArray(scene.choices)?scene.choices:[];
+        scene.choices=shared.choices.map((choice,choiceIndex)=>{
+          const old=oldChoices[choiceIndex]||{};
+          return {
+            ...old,
+            text:String(choice?.text??""),
+            result:String(choice?.result??"")
+          };
+        });
+      }
+    });
+  }
+
+  const allScenes=ep.versions?Object.values(ep.versions).flatMap(v=>v.scenes||[]):(ep.scenes||[]);
+  allScenes.forEach((s,i)=>{
+    const refKey="scene_"+i;
+
+    // 장면 내부의 기존 참고 이미지는 공통 순번 키로 이관한다.
+    if(s.referenceImage&&!ep.sharedSceneReferences[refKey]){
+      ep.sharedSceneReferences[refKey]={
+        image:s.referenceImage,
+        x:Number(s.referenceImageX??50),
+        y:Number(s.referenceImageY??45),
+        width:Number(s.referenceImageWidth??35)
+      };
+    }
+
+    // 이전 버전에서 장면 ID를 키로 저장한 공통 참고 이미지도 자동 이관한다.
+    const sceneId=String(s.id||"").trim();
+    if(!ep.sharedSceneReferences[refKey]&&sceneId&&ep.sharedSceneReferences[sceneId]?.image){
+      ep.sharedSceneReferences[refKey]={
+        image:ep.sharedSceneReferences[sceneId].image,
+        x:Number(ep.sharedSceneReferences[sceneId].x??50),
+        y:Number(ep.sharedSceneReferences[sceneId].y??45),
+        width:Number(ep.sharedSceneReferences[sceneId].width??35)
+      };
+    }
+
+    if(s.background&&!ep.assets.backgrounds[s.background])ep.assets.backgrounds[s.background]={label:s.background,image:""};
+    const castIds=Array.isArray(s.cast)?s.cast.filter(Boolean):[];
+    if(s.character&&!castIds.includes(s.character))castIds.unshift(s.character);
+    castIds.forEach(id=>{if(!ep.assets.characters[id])ep.assets.characters[id]={label:id,image:""}});
+    if(!s.character&&castIds.length)s.character=castIds[0];
+    if(!s.id)s.id="장면_"+String(i+1).padStart(3,"0");
+    if(s.dialogue&&!s.text)s.text=s.dialogue;
+  });
+  return ep;
+}
+function versionsOf(ep){return ep.versions?Object.keys(ep.versions):["default"]}
+function scenesOf(ep,key){return ep.versions?(ep.versions[key]?.scenes||[]):(ep.scenes||[])}
+function setScenes(ep,key,scenes){if(ep.versions){ep.versions[key]=ep.versions[key]||{};ep.versions[key].scenes=scenes}else ep.scenes=scenes}
+function assetEntry(ep,type,id){
+  const raw=ep.assets?.[type]?.[id];
+  if(typeof raw==="string")return {image:raw,label:id};
+  return raw||{image:"",label:id};
+}
+function normalizeId(v){return String(v??"").trim().replace(/\s+/g," ")}
+function assetUrl(ep,type,id){
+  const wanted=normalizeId(id);
+  if(!wanted)return "";
+  const group=ep.assets?.[type]||{};
+  if(group[wanted])return assetEntry(ep,type,wanted).image||"";
+  const match=Object.keys(group).find(k=>normalizeId(k)===wanted);
+  return match?assetEntry(ep,type,match).image||"":"";
+}
+function sceneCharacterId(scene){
+  if(scene?.character)return scene.character;
+  if(Array.isArray(scene?.cast)&&scene.cast.length)return scene.cast[0];
+  return "";
+}
+function characterDisplayName(ep,scene){
+  const id=sceneCharacterId(scene);
+  if(id)return String(id);
+  return String(scene?.speaker||"");
+}
+function legacySharedReferenceKeys(scene,index=0){
+  const keys=[];
+  const id=String(scene?.id||"").trim();
+  if(id)keys.push(id);
+
+  // 민수_000_001 / 예리_000_001처럼 주인공 이름만 다른 ID도 함께 탐색한다.
+  if(id){
+    const normalized=id.replace(/^(민수|예리)[_-]?/,"");
+    if(normalized&&normalized!==id)keys.push("legacy_"+normalized);
+  }
+
+  keys.push("scene_"+index);
+  return [...new Set(keys)];
+}
+function sharedReferenceKey(scene,index=0){
+  // 버전 간 연동 기준은 장면 ID가 아니라 각 버전 안의 장면 순번이다.
+  return "scene_"+index;
+}
+function sharedReferenceOf(ep,scene,index=0,create=false){
+  ep.sharedSceneReferences=ep.sharedSceneReferences||{};
+  const key=sharedReferenceKey(scene,index);
+
+  // v18 이하에서 장면 ID를 키로 저장한 데이터를 새 순번 키로 자동 이관한다.
+  if(!ep.sharedSceneReferences[key]){
+    const oldKeys=legacySharedReferenceKeys(scene,index);
+    for(const oldKey of oldKeys){
+      if(oldKey===key)continue;
+      if(ep.sharedSceneReferences[oldKey]?.image){
+        ep.sharedSceneReferences[key]={
+          image:ep.sharedSceneReferences[oldKey].image,
+          x:Number(ep.sharedSceneReferences[oldKey].x??50),
+          y:Number(ep.sharedSceneReferences[oldKey].y??45),
+          width:Number(ep.sharedSceneReferences[oldKey].width??35)
+        };
+        break;
+      }
+    }
+  }
+
+  if(!ep.sharedSceneReferences[key]&&scene?.referenceImage){
+    ep.sharedSceneReferences[key]={
+      image:scene.referenceImage,
+      x:Number(scene.referenceImageX??50),
+      y:Number(scene.referenceImageY??45),
+      width:Number(scene.referenceImageWidth??35)
+    };
+  }
+
+  if(create&&!ep.sharedSceneReferences[key]){
+    ep.sharedSceneReferences[key]={image:"",x:50,y:45,width:35};
+  }
+
+  return ep.sharedSceneReferences[key]||null;
+}
+function clearLegacyReference(scene){
+  delete scene.referenceImage;
+  delete scene.referenceImageX;
+  delete scene.referenceImageY;
+  delete scene.referenceImageWidth;
+}
+function sharedContentKey(index=0){
+  return "scene_"+index;
+}
+function sharedContentOf(ep,scene,index=0,create=false){
+  ep.sharedSceneContent=ep.sharedSceneContent||{};
+  const key=sharedContentKey(index);
+
+  if(!ep.sharedSceneContent[key]&&scene){
+    ep.sharedSceneContent[key]={
+      text:String(scene.text??scene.dialogue??""),
+      prompt:String(scene.prompt??""),
+      choices:Array.isArray(scene.choices)
+        ? scene.choices.map(choice=>({
+            text:String(choice?.text??choice?.label??""),
+            result:String(choice?.result??"")
+          }))
+        : []
+    };
+  }
+
+  if(create&&!ep.sharedSceneContent[key]){
+    ep.sharedSceneContent[key]={text:"",prompt:"",choices:[]};
+  }
+
+  return ep.sharedSceneContent[key]||null;
+}
+function syncSharedContentToVersions(ep,index=0){
+  if(!ep)return;
+  const shared=ep.sharedSceneContent?.[sharedContentKey(index)];
+  if(!shared)return;
+
+  const groups=ep.versions
+    ? Object.values(ep.versions).map(version=>version?.scenes||[])
+    : [ep.scenes||[]];
+
+  groups.forEach(scenes=>{
+    const scene=scenes[index];
+    if(!scene)return;
+
+    scene.text=String(shared.text??"");
+    if("dialogue" in scene)scene.dialogue=scene.text;
+
+    if(shared.prompt||"prompt" in scene)scene.prompt=String(shared.prompt??"");
+
+    if(Array.isArray(shared.choices)&&shared.choices.length){
+      const oldChoices=Array.isArray(scene.choices)?scene.choices:[];
+      scene.choices=shared.choices.map((choice,choiceIndex)=>{
+        const old=oldChoices[choiceIndex]||{};
+        return {
+          ...old,
+          text:String(choice?.text??""),
+          result:String(choice?.result??"")
+        };
+      });
+    }
+  });
+}
+function svgThumb(title){return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><rect width='100%' height='100%' fill='#dbeafe'/><text x='50%' y='47%' text-anchor='middle' font-family='sans-serif' font-size='42' font-weight='700' fill='#1e3a8a'>${esc(title)}</text><text x='50%' y='60%' text-anchor='middle' font-family='sans-serif' font-size='22' fill='#475569'>JSON 에피소드</text></svg>`)}
+
+async function refresh(){episodes=(await DB.all()).sort((a,b)=>{
+  const an=episodeNumberOf(a),bn=episodeNumberOf(b);
+  if(an!==bn)return an-bn;
+  return (a.order??9999)-(b.order??9999);
+});renderList();renderAdmin()}
+function renderList(){
+  $("#episodeGrid").innerHTML="";$("#empty").classList.toggle("hidden",episodes.length>0);
+  episodes.forEach(ep=>$("#episodeGrid").insertAdjacentHTML("beforeend",`<div class="episode-card"><button type="button" class="episode-play" data-play="${esc(ep.episodeId)}">${esc(cardTitleOf(ep))}</button><button type="button" class="tip-button" data-tip="${esc(ep.episodeId)}">팁 보기</button></div>`));
+  document.querySelectorAll("[data-play]").forEach(card=>card.onclick=()=>startEpisode(card.dataset.play,false));
+  document.querySelectorAll("[data-tip]").forEach(button=>button.onclick=e=>{e.stopPropagation();startEpisode(button.dataset.tip,true)});
+}
+function renderAdmin(){
+  $("#adminList").innerHTML="";
+  episodes.forEach(ep=>$("#adminList").insertAdjacentHTML("beforeend",`<div class="admin-item"><div><strong>${esc(ep.title)}</strong><div style="font-size:13px;color:#6b7280">${esc(ep.episodeId)}</div></div><div class="row"><button class="btn sub" data-edit="${esc(ep.episodeId)}">편집</button><button class="btn sub" data-export="${esc(ep.episodeId)}">JSON 내보내기</button><label class="btn sub upload">교체<input type="file" accept=".json,application/json" data-replace="${esc(ep.episodeId)}"></label><button class="btn danger" data-delete="${esc(ep.episodeId)}">삭제</button></div></div>`));
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openEditor(b.dataset.edit));
+  document.querySelectorAll("[data-export]").forEach(b=>b.onclick=async()=>download(JSON.stringify(await DB.get(b.dataset.export),null,2),b.dataset.export+".json","application/json"));
+  document.querySelectorAll("[data-replace]").forEach(i=>i.onchange=async()=>{const f=i.files[0];if(!f)return;try{const incoming=ensureEpisode(JSON.parse(await f.text()));incoming.episodeId=i.dataset.replace;await DB.put(incoming);await refresh();alert("에피소드를 교체했습니다.")}catch(e){alert("올바른 JSON 파일이 아닙니다.")}});
+  document.querySelectorAll("[data-delete]").forEach(b=>b.onclick=async()=>{if(confirm("삭제할까요?")){await DB.del(b.dataset.delete);refresh()}});
+}
+
+$("#jsonInput").onchange=async e=>{
+  for(const file of e.target.files){
+    try{
+      const ep=ensureEpisode(JSON.parse(await file.text()));
+      if(await DB.get(ep.episodeId)&&!confirm(ep.episodeId+"가 이미 있습니다. 교체할까요?"))continue;
+      if(ep.order==null)ep.order=episodeNumberOf(ep);const bgCount=Object.keys(ep.assets.backgrounds||{}).length;const chCount=Object.keys(ep.assets.characters||{}).length;const sceneCount=versionsOf(ep).reduce((sum,k)=>sum+scenesOf(ep,k).length,0);await DB.put(ep);alert(`${ep.title} 등록 완료\n장면 ${sceneCount}개\n배경 ${bgCount}개\n등장인물 ${chCount}개`);
+    }catch(err){alert(file.name+" 파일을 읽지 못했습니다. JSON 형식을 확인하세요.")}
+  }
+  e.target.value="";refresh();
+};
+
+function openEditor(id){
+  editing=structuredClone(episodes.find(e=>e.episodeId===id));
+  currentVersion=versionsOf(editing)[0];
+  $("#editorTitle").textContent=editing.title+" 편집";
+  $("#editId").value=editing.episodeId;
+  $("#editEpisodeNumber").value=episodeNumberOf(editing)===9999?"":episodeNumberOf(editing);
+  $("#editTitle").value=editing.title;
+  $("#editCardTitle").value=cardTitleOf(editing);
+  $("#editDescription").value=editing.description||"";
+  renderVersionSelect();renderAssets();renderScenes();switchTab("info");$("#editorModal").classList.remove("hidden");
+}
+function renderVersionSelect(){
+  $("#versionSelect").innerHTML=versionsOf(editing).map(v=>`<option value="${esc(v)}">${v==="default"?"기본":esc(v)}</option>`).join("");
+  $("#versionSelect").value=currentVersion;
+}
+$("#versionSelect").onchange=()=>{currentVersion=$("#versionSelect").value;renderScenes()};
+
+function renderAssets(){
+  renderAssetGroup("backgrounds","#backgroundAssets");
+  renderAssetGroup("characters","#characterAssets");
+}
+function renderAssetGroup(type,target){
+  const el=$(target);el.innerHTML="";
+  Object.keys(editing.assets[type]||{}).forEach(id=>{
+    const item=assetEntry(editing,type,id),card=document.createElement("div");card.className="asset-card";
+    card.innerHTML=`<div class="asset-id">${esc(id)}</div><img class="asset-preview" src="${item.image||""}" alt=""><div class="row"><label class="btn sub small upload">이미지 업로드<input type="file" accept="image/*"></label><button class="btn sub small" data-rename>ID 변경</button><button class="btn danger small">삭제</button></div>`;
+    const input=card.querySelector("input"),img=card.querySelector("img"),del=card.querySelector("button.danger"),rename=card.querySelector("[data-rename]");
+    input.onchange=async()=>{
+      const file=input.files[0];if(!file)return;
+      const data=await fileToDataUrl(file);
+      editing.assets[type][id]={...item,image:data,label:item.label||id};
+      img.src=data;
+      await DB.put(structuredClone(editing));
+      let note=card.querySelector(".auto-save");
+      if(!note){note=document.createElement("div");note.className="auto-save";card.appendChild(note)}
+      note.textContent="이미지가 자동 저장되었습니다.";
+      updatePreview(scenesOf(editing,currentVersion)[0]||null);
+    };
+    rename.onclick=()=>{const next=prompt("새 한글 ID를 입력하세요.",id);if(!next||next===id)return;if(editing.assets[type][next])return alert("이미 존재하는 ID입니다.");editing.assets[type][next]=editing.assets[type][id];delete editing.assets[type][id];for(const v of versionsOf(editing)){for(const s of scenesOf(editing,v)){const key=type==="backgrounds"?"background":"character";if(s[key]===id){s[key]=next;if(type==="characters")s.speaker=next}if(type==="characters"&&Array.isArray(s.cast))s.cast=s.cast.map(v=>v===id?next:v)}}renderAssets();renderScenes()};del.onclick=()=>{if(confirm(id+" 자산을 삭제할까요?")){delete editing.assets[type][id];renderAssets();renderScenes()}};
+    el.appendChild(card);
+  });
+}
+function addAsset(type){
+  const id=prompt((type==="backgrounds"?"배경":"캐릭터")+" ID를 입력하세요.");
+  if(!id)return;if(editing.assets[type][id])return alert("이미 존재하는 ID입니다.");
+  editing.assets[type][id]={image:"",label:id};renderAssets();renderScenes();
+}
+$("#addBackground").onclick=()=>addAsset("backgrounds");$("#addCharacter").onclick=()=>addAsset("characters");
+
+function renderScenes(keepPreview=false){
+  const list=$("#sceneList");
+  const previewPanel=$("#scenePreviewPanel");
+  const rememberedIndex=keepPreview?previewSceneIndex:-1;
+
+  // 미리보기 패널이 장면 목록 안으로 이동한 상태라면,
+  // 목록을 다시 그리기 전에 원래 위치로 되돌려 DOM에서 삭제되지 않게 한다.
+  if(previewPanel&&previewPanel.parentElement===list){
+    list.parentElement.insertBefore(previewPanel,list);
+  }
+
+  previewPanel.classList.add("hidden");
+  previewScene=null;
+  previewSceneIndex=-1;
+  list.innerHTML="";
+  const scenes=scenesOf(editing,currentVersion);
+  if(!scenes.length){updatePreview(null);list.innerHTML='<div class="empty">장면이 없습니다. 장면 추가를 눌러주세요.</div>';return}
+  scenes.forEach((scene,index)=>{
+    const card=document.createElement("div");card.className="scene-card";
+    const bgOptions=['<option value="">없음</option>',...Object.keys(editing.assets.backgrounds).map(id=>`<option value="${esc(id)}" ${scene.background===id?"selected":""}>${esc(id)}</option>`)].join("");
+    const currentCharacter=sceneCharacterId(scene);const chOptions=['<option value="">없음</option>',...Object.keys(editing.assets.characters).map(id=>`<option value="${esc(id)}" ${currentCharacter===id?"selected":""}>${esc(id)}</option>`)].join("");
+    card.innerHTML=`<div class="scene-head"><strong>장면 ${index+1}</strong><div class="row"><button class="btn sub small" data-preview>미리보기</button><button class="btn sub small" data-copy>복제</button><button class="btn sub small" data-up>위</button><button class="btn sub small" data-down>아래</button><button class="btn danger small" data-del>삭제</button></div></div><div class="form-grid"><div class="field"><label>배경 ID</label><select data-k="background">${bgOptions}</select></div><div class="field"><label>등장인물 ID <span style="font-size:12px;color:#2563eb">(실제 대화창 이름)</span></label><select data-k="character">${chOptions}</select></div><div class="field"><label>대화창 표시 이름</label><input data-k="speaker" value="${esc(characterDisplayName(editing,scene))}" ${currentCharacter?"readonly":""}></div><div class="field"><label>장면 ID</label><input data-k="id" value="${esc(scene.id||"")}"></div><div class="field" style="grid-column:1/-1"><label>대사 <span style="font-size:12px;color:#2563eb">(민수·예리 공통)</span></label><textarea data-k="text">${esc(sharedContentOf(editing,scene,index,true)?.text||"")}</textarea></div><div class="field" style="grid-column:1/-1"><label>장면 참고 이미지</label><div class="row"><label class="btn sub small upload">이미지 첨부<input type="file" accept="image/*" data-reference-upload></label><button type="button" class="btn danger small" data-reference-remove ${sharedReferenceOf(editing,scene,index)?.image?"":"disabled"}>이미지 삭제</button><span style="font-size:12px;color:#6b7280">${sharedReferenceOf(editing,scene,index)?.image?"민수·예리 공통 이미지":"첨부 없음"}</span></div></div></div>`;
+    card.querySelectorAll("[data-k]").forEach(x=>x.oninput=()=>{
+      const k=x.dataset.k;
+      if(k==="text"){
+        const shared=sharedContentOf(editing,scene,index,true);
+        shared.text=x.value;
+        syncSharedContentToVersions(editing,index);
+      }else{
+        scene[k]=x.value;
+      }
+      if(k==="character"){
+        if(Array.isArray(scene.cast)){
+          if(x.value)scene.cast=[x.value,...scene.cast.filter(v=>v!==x.value)];
+          else scene.cast=[];
+        }
+        const speakerInput=card.querySelector('[data-k="speaker"]');
+        if(x.value){
+          scene.speaker=String(x.value);
+          speakerInput.value=String(x.value);
+          speakerInput.readOnly=true;
+        }else{
+          speakerInput.readOnly=false;
+        }
+      }
+      updatePreview(scene,index);
+    });
+    const refUpload=card.querySelector("[data-reference-upload]");
+    const refRemove=card.querySelector("[data-reference-remove]");
+    refUpload.onchange=async()=>{const file=refUpload.files[0];if(!file)return;const ref=sharedReferenceOf(editing,scene,index,true);ref.image=await fileToDataUrl(file);ref.x=Number(ref.x??50);ref.y=Number(ref.y??45);ref.width=Number(ref.width??35);clearLegacyReference(scene);previewScene=scene;previewSceneIndex=index;renderScenes(true)};
+    refRemove.onclick=()=>{delete editing.sharedSceneReferences[sharedReferenceKey(scene,index)];clearLegacyReference(scene);previewScene=scene;previewSceneIndex=index;renderScenes(true)};
+    card.querySelector("[data-preview]").onclick=()=>{
+      document.querySelectorAll(".scene-card").forEach(c=>c.classList.remove("active"));
+      card.classList.add("active");
+      const previewPanel=$("#scenePreviewPanel");
+      list.insertBefore(previewPanel,card);
+      previewPanel.classList.remove("hidden");
+      updatePreview(scene,index);
+      previewPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
+    };
+    card.querySelector("[data-copy]").onclick=()=>{scenes.splice(index+1,0,structuredClone(scene));scenes[index+1].id=(scene.id||"장면")+"-복사";renderScenes()};
+    card.querySelector("[data-up]").onclick=()=>{if(index>0){[scenes[index-1],scenes[index]]=[scenes[index],scenes[index-1]];renderScenes()}};
+    card.querySelector("[data-down]").onclick=()=>{if(index<scenes.length-1){[scenes[index+1],scenes[index]]=[scenes[index],scenes[index+1]];renderScenes()}};
+    card.querySelector("[data-del]").onclick=()=>{if(confirm("장면을 삭제할까요?")){scenes.splice(index,1);renderScenes()}};
+    list.appendChild(card);
+  });
+
+  if(rememberedIndex>=0&&rememberedIndex<scenes.length){
+    const cards=list.querySelectorAll(".scene-card");
+    const card=cards[rememberedIndex];
+    if(card){
+      list.insertBefore(previewPanel,card);
+      previewPanel.classList.remove("hidden");
+      card.classList.add("active");
+      updatePreview(scenes[rememberedIndex],rememberedIndex);
+    }
+  }else{
+    updatePreview(null);
+  }
+}
+function referenceLayout(ref){
+  return {
+    x:Math.max(0,Math.min(100,Number(ref?.x??50))),
+    y:Math.max(0,Math.min(100,Number(ref?.y??45))),
+    width:Math.max(8,Math.min(90,Number(ref?.width??35)))
+  };
+}
+function applyReferenceLayout(img,ref){
+  const p=referenceLayout(ref);
+  img.style.left=p.x+"%";
+  img.style.top=p.y+"%";
+  img.style.width=p.width+"%";
+  img.style.transform="translate(-50%,-50%)";
+}
+function syncReferenceControls(ref){
+  const has=Boolean(ref?.image);
+  $("#referenceControls").classList.toggle("hidden",!has);
+  if(!has)return;
+  const p=referenceLayout(ref);
+  $("#refX").value=p.x;$("#refY").value=p.y;$("#refW").value=p.width;
+  $("#refXValue").textContent=Math.round(p.x)+"%";
+  $("#refYValue").textContent=Math.round(p.y)+"%";
+  $("#refWValue").textContent=Math.round(p.width)+"%";
+}
+function positionReferenceHandle(){
+  const img=$("#previewReference"),handle=$("#referenceHandle");
+  if(img.classList.contains("hidden")){handle.classList.add("hidden");return}
+  const box=$("#scenePreview").getBoundingClientRect(),r=img.getBoundingClientRect();
+  handle.style.left=(r.right-box.left-9)+"px";
+  handle.style.top=(r.bottom-box.top-9)+"px";
+  handle.classList.remove("hidden");
+}
+function updatePreview(scene,index=0){
+  previewScene=scene||null;previewSceneIndex=index;
+  if(!scene){
+    $("#previewBg").src="";$("#previewChar").classList.add("hidden");$("#previewReference").classList.add("hidden");$("#referenceHandle").classList.add("hidden");$("#referenceControls").classList.add("hidden");$("#previewSpeaker").textContent="";$("#previewText").textContent="";return
+  }
+  $("#previewBg").src=assetUrl(editing,"backgrounds",scene.background)||"";
+  const cu=assetUrl(editing,"characters",sceneCharacterId(scene))||"";
+  $("#previewChar").src=cu;$("#previewChar").classList.toggle("hidden",!cu);
+  const sharedRef=sharedReferenceOf(editing,scene,index);
+  const ref=$("#previewReference");
+  ref.src=sharedRef?.image||"";
+  ref.classList.toggle("hidden",!sharedRef?.image);
+  ref.classList.toggle("selected",Boolean(sharedRef?.image));
+  if(sharedRef?.image){applyReferenceLayout(ref,sharedRef);requestAnimationFrame(positionReferenceHandle)}
+  else $("#referenceHandle").classList.add("hidden");
+  syncReferenceControls(sharedRef);
+  $("#previewSpeaker").textContent=characterDisplayName(editing,scene);
+  const sharedContent=sharedContentOf(editing,scene,index);
+  $("#previewText").textContent=sharedContent?.text??scene.text??scene.dialogue??"";
+}
+["refX","refY","refW"].forEach(id=>$("#"+id).oninput=()=>{
+  if(!previewScene)return;
+  const ref=sharedReferenceOf(editing,previewScene,previewSceneIndex,true);
+  ref.x=Number($("#refX").value);
+  ref.y=Number($("#refY").value);
+  ref.width=Number($("#refW").value);
+  syncReferenceControls(ref);applyReferenceLayout($("#previewReference"),ref);requestAnimationFrame(positionReferenceHandle);
+});
+(function enableReferenceDragResize(){
+  const img=$("#previewReference"),handle=$("#referenceHandle"),box=$("#scenePreview");
+  let mode="",startX=0,startY=0,start={};
+  const begin=(e,nextMode)=>{
+    const currentRef=previewScene?sharedReferenceOf(editing,previewScene,previewSceneIndex):null;
+    if(!currentRef?.image)return;
+    e.preventDefault();e.stopPropagation();mode=nextMode;startX=e.clientX;startY=e.clientY;start=referenceLayout(currentRef);
+    window.addEventListener("pointermove",move);window.addEventListener("pointerup",end,{once:true});
+  };
+  const move=e=>{
+    if(!mode)return;
+    const r=box.getBoundingClientRect();
+    if(mode==="move"){
+      const ref=sharedReferenceOf(editing,previewScene,previewSceneIndex,true);
+      ref.x=Math.max(0,Math.min(100,start.x+(e.clientX-startX)/r.width*100));
+      ref.y=Math.max(0,Math.min(100,start.y+(e.clientY-startY)/r.height*100));
+    }else{
+      const ref=sharedReferenceOf(editing,previewScene,previewSceneIndex,true);
+      ref.width=Math.max(8,Math.min(90,start.width+(e.clientX-startX)/r.width*100));
+    }
+    const ref=sharedReferenceOf(editing,previewScene,previewSceneIndex,true);
+    applyReferenceLayout(img,ref);syncReferenceControls(ref);positionReferenceHandle();
+  };
+  const end=()=>{mode="";window.removeEventListener("pointermove",move)};
+  img.addEventListener("pointerdown",e=>begin(e,"move"));
+  handle.addEventListener("pointerdown",e=>begin(e,"resize"));
+  window.addEventListener("resize",positionReferenceHandle);
+})();
+$("#addScene").onclick=()=>{const scenes=scenesOf(editing,currentVersion);scenes.push({id:"장면_"+String(scenes.length+1).padStart(3,"0"),background:"",character:"",speaker:"",text:""});renderScenes()};
+$("#copyVersion").onclick=()=>{const keys=versionsOf(editing).filter(v=>v!==currentVersion);if(!keys.length)return alert("복사할 다른 버전이 없습니다.");const target=prompt("복사할 대상 버전: "+keys.join(", "),keys[0]);if(!target||!keys.includes(target))return;if(!confirm(`${currentVersion} 장면을 ${target} 버전에 복사할까요? 기존 장면은 교체됩니다.`))return;setScenes(editing,target,structuredClone(scenesOf(editing,currentVersion)));alert("복사했습니다.")};
+$("#validateJson").onclick=()=>{try{const ep=ensureEpisode(structuredClone(editing));const problems=[];for(const v of versionsOf(ep)){scenesOf(ep,v).forEach((s,i)=>{if(!s.text&&!s.dialogue)problems.push(`${v} 장면 ${i+1}: 대사 없음`);if(s.background&&!ep.assets.backgrounds[s.background])problems.push(`${v} 장면 ${i+1}: 배경 ID 누락`);if(s.character&&!ep.assets.characters[s.character])problems.push(`${v} 장면 ${i+1}: 등장인물 ID 누락`)})}alert(problems.length?problems.join("\n"):"JSON 구조에 문제가 없습니다.")}catch(e){alert("검사 중 오류: "+e.message)}};
+$("#exportCurrent").onclick=()=>download(JSON.stringify(ensureEpisode(structuredClone(editing)),null,2),(editing.episodeId||"에피소드")+".json","application/json");
+
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+function switchTab(name){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  $("#tabInfo").classList.toggle("hidden",name!=="info");$("#tabAssets").classList.toggle("hidden",name!=="assets");$("#tabScenes").classList.toggle("hidden",name!=="scenes");
+}
+$("#saveEpisode").onclick=async()=>{
+  const oldId=editing.episodeId,newId=$("#editId").value.trim()||oldId;
+  editing.episodeId=newId;
+  editing.title=$("#editTitle").value.trim()||newId;
+  const enteredNumber=Number($("#editEpisodeNumber").value);
+  editing.episodeNumber=Number.isFinite(enteredNumber)&&enteredNumber>0?enteredNumber:episodeNumberOf(editing);
+  editing.order=editing.episodeNumber;
+  editing.cardTitle=$("#editCardTitle").value.trim()||cardTitleOf(editing);
+  editing.description=$("#editDescription").value.trim();
+  if(newId!==oldId)await DB.del(oldId);await DB.put(editing);await refresh();$("#editorModal").classList.add("hidden");alert("저장했습니다.");
+};
+$("#closeEditor").onclick=()=>$("#editorModal").classList.add("hidden");
+
+function fileToDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(file)})}
+function download(data,name,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+async function startEpisode(id,tipMode=false){
+  playing=await DB.get(id);
+  pendingTipMode=Boolean(tipMode);
+  if(!playing)return alert("에피소드를 찾을 수 없습니다.");
+  const keys=versionsOf(playing);
+  if(keys.length<=1){beginVersion(keys[0],pendingTipMode);return}
+  $("#versionButtons").innerHTML="";
+  keys.forEach(key=>{
+    const b=document.createElement("button");
+    b.className="btn version-btn";
+    b.textContent=key;
+    b.onclick=()=>{ $("#versionModal").classList.add("hidden"); beginVersion(key,pendingTipMode) };
+    $("#versionButtons").appendChild(b);
+  });
+  $("#versionModal").classList.remove("hidden");
+}
+function beginVersion(key,tipMode=false){
+  playScenes=scenesOf(playing,key);
+  sceneIndex=tipMode?playScenes.length:0;
+  pendingTipMode=false;
+  $("#player").classList.remove("hidden");
+  renderPlay();
+}
+$("#versionModal").onclick=e=>{
+  if(e.target!==$("#versionModal"))return;
+  $("#versionModal").classList.add("hidden");
+  pendingTipMode=false;
+};
+
+function showTips(){
+  $("#dialog").classList.remove("choice-mode");
+
+  // 팁 보기로 바로 진입한 경우에도 현재 선택한 버전의 마지막 장면
+  // 배경·등장인물·참고 이미지를 먼저 적용한다.
+  const lastIndex=Math.max(0,playScenes.length-1);
+  const lastScene=playScenes[lastIndex];
+  if(lastScene){
+    const bg=assetUrl(playing,"backgrounds",lastScene.background);
+    $("#playerBg").src=bg||"";
+
+    const charId=sceneCharacterId(lastScene);
+    const charUrl=assetUrl(playing,"characters",charId);
+    $("#playerChar").src=charUrl||"";
+    $("#playerChar").classList.toggle("hidden",!charUrl);
+
+    const sharedRef=sharedReferenceOf(playing,lastScene,lastIndex);
+    const playerRef=$("#playerReference");
+    playerRef.src=sharedRef?.image||"";
+    playerRef.classList.toggle("hidden",!sharedRef?.image);
+    if(sharedRef?.image)applyReferenceLayout(playerRef,sharedRef);
+  }else{
+    $("#playerBg").src="";
+    $("#playerChar").src="";
+    $("#playerChar").classList.add("hidden");
+    $("#playerReference").src="";
+    $("#playerReference").classList.add("hidden");
+  }
+
+  const tips=Array.isArray(playing?.tips)?playing.tips:[];
+  $("#speaker").textContent="오늘의 자취 꿀팁";
+  $("#dialogText").innerHTML=tips.length
+    ? `<div class="tip-list">${tips.map((tip,i)=>`<div class="tip-item"><strong>${i+1}.</strong> ${esc(tip)}</div>`).join("")}</div>`
+    : "에피소드가 끝났습니다.";
+  $("#choiceWrap").innerHTML="";
+  const actions=document.createElement("div");actions.className="end-actions";
+  const listBtn=document.createElement("button");listBtn.className="btn";listBtn.textContent="에피소드 목록";listBtn.onclick=e=>{e.stopPropagation();$("#player").classList.add("hidden")};
+  const replayBtn=document.createElement("button");replayBtn.className="btn sub";replayBtn.textContent="다시 플레이";replayBtn.onclick=e=>{e.stopPropagation();sceneIndex=0;renderPlay()};
+  const versionBtn=document.createElement("button");versionBtn.className="btn sub";versionBtn.textContent="민수/예리 버전 선택";versionBtn.onclick=e=>{e.stopPropagation();$("#player").classList.add("hidden");startEpisode(playing.episodeId,false)};
+  actions.append(listBtn,replayBtn,versionBtn);$("#choiceWrap").appendChild(actions);
+}
+function renderPlay(){
+  $("#dialog").classList.remove("choice-mode");
+  $("#previousScene").disabled=sceneIndex<=0;
+  if(!playScenes.length){$("#speaker").textContent="";$("#dialogText").textContent="장면이 없습니다.";$("#playerBg").src="";$("#playerChar").classList.add("hidden");$("#playerReference").classList.add("hidden");$("#choiceWrap").innerHTML="";return}
+  if(sceneIndex>=playScenes.length){showTips();return}
+  const s=playScenes[sceneIndex];
+  const sharedContent=sharedContentOf(playing,s,sceneIndex);
+  $("#speaker").textContent=characterDisplayName(playing,s);
+  $("#dialogText").textContent=sharedContent?.text??s.text??s.dialogue??"";
+  const bg=assetUrl(playing,"backgrounds",s.background);
+  $("#playerBg").src=bg||"";
+  const charId=sceneCharacterId(s);
+  const cu=assetUrl(playing,"characters",charId);
+  $("#playerChar").src=cu||"";
+  $("#playerChar").classList.toggle("hidden",!cu);
+  const sharedRef=sharedReferenceOf(playing,s,sceneIndex);
+  const playerRef=$("#playerReference");
+  playerRef.src=sharedRef?.image||"";
+  playerRef.classList.toggle("hidden",!sharedRef?.image);
+  if(sharedRef?.image)applyReferenceLayout(playerRef,sharedRef);
+  $("#choiceWrap").innerHTML="";
+  const choices=(Array.isArray(sharedContent?.choices)&&sharedContent.choices.length)?sharedContent.choices:(s.choices||[]);
+  if(choices.length){
+    $("#dialog").classList.add("choice-mode");
+    const promptText=sharedContent?.prompt??s.prompt??"";
+    if(promptText){const prompt=document.createElement("div");prompt.style.marginTop="6px";prompt.style.fontWeight="800";prompt.textContent=promptText;$("#choiceWrap").appendChild(prompt)}
+    choices.forEach(c=>{
+      const b=document.createElement("button");b.className="btn sub choice";b.textContent=c.text||c.label||"선택";
+      b.onclick=e=>{e.stopPropagation();if(c.result){$("#dialogText").textContent=c.result;$("#choiceWrap").innerHTML="";const next=document.createElement("button");next.className="btn choice";next.textContent="다음";next.onclick=ev=>{ev.stopPropagation();sceneIndex++;renderPlay()};$("#choiceWrap").appendChild(next)}else{sceneIndex++;renderPlay()}};
+      $("#choiceWrap").appendChild(b);
+    });
+  }
+}
+$("#dialog").onclick=()=>{
+  if(sceneIndex>=playScenes.length)return;
+  const s=playScenes[sceneIndex];
+  const shared=sharedContentOf(playing,s,sceneIndex);
+  const choices=(Array.isArray(shared?.choices)&&shared.choices.length)?shared.choices:(s?.choices||[]);
+  if(choices.length)return;
+  sceneIndex++;
+  renderPlay();
+};
+$("#closePlayer").onclick=()=>$("#player").classList.add("hidden");
+$("#previousScene").onclick=e=>{
+  e.stopPropagation();
+  if(sceneIndex<=0)return;
+  sceneIndex=Math.max(0,sceneIndex-1);
+  renderPlay();
+};
+$("#restartPlayer").onclick=()=>{sceneIndex=0;renderPlay()};
+
+$("#adminBtn").onclick=()=>{if(!adminUnlocked){$("#loginModal").classList.remove("hidden");$("#password").focus()}else showAdmin()};
+$("#confirmLogin").onclick=()=>{if($("#password").value==="0070"){adminUnlocked=true;$("#loginModal").classList.add("hidden");showAdmin()}else $("#loginError").classList.remove("hidden")};
+$("#cancelLogin").onclick=()=>$("#loginModal").classList.add("hidden");
+function showAdmin(){$("#listView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#backBtn").classList.remove("hidden");$("#pageTitle").textContent="관리자 모드";$("#pageSub").textContent="JSON 에피소드와 장면을 편집합니다."}
+$("#backBtn").onclick=()=>{$("#adminView").classList.add("hidden");$("#listView").classList.remove("hidden");$("#backBtn").classList.add("hidden");$("#pageTitle").textContent="자취 상황 시뮬레이터";$("#pageSub").textContent=""}
+
+$("#password").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    $("#confirmLogin").click();
+  }
+});
+$("#loginModal").addEventListener("click",e=>{
+  if(e.target===$("#loginModal"))$("#loginModal").classList.add("hidden");
+});
+
+refresh();
+</script>
+</body>
+</html>
