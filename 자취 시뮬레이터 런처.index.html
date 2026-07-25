@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>자취 시뮬레이터 v22</title>
+<title>자취 시뮬레이터</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:#f4f6f8;color:#111827}
 button,input,textarea,select{font:inherit}.hidden{display:none!important}.top{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:20}
@@ -11,9 +11,9 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}.top{di
 .btn{border:0;border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer;background:#2563eb;color:#fff}.btn.sub{background:#eef2f7;color:#111827}.btn.danger{background:#fee2e2;color:#991b1b}.btn.small{padding:7px 10px;font-size:13px}
 main{max-width:1180px;margin:auto;padding:18px}
 .grid{display:grid;grid-template-columns:1fr;gap:12px}
-.episode-card{width:100%;min-height:72px;display:flex;align-items:stretch;background:#eef4ff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 3px 12px #0f172a0a;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
-.episode-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px #0f172a12;border-color:#bfdbfe}
-.episode-play{flex:1;border:0;background:transparent;padding:18px 22px;cursor:pointer;text-align:left;color:#1e3a5f;font-size:19px;font-weight:800;line-height:1.4}
+.episode-card{width:100%;min-height:72px;display:flex;align-items:stretch;background:#eef9df;border:1px solid #cee6b6;border-radius:16px;box-shadow:0 3px 12px #0f172a0a;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.episode-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px #0f172a12;border-color:#a8cf82}
+.episode-play{flex:1;border:0;background:transparent;padding:18px 22px;cursor:pointer;text-align:left;color:#365b2b;font-size:19px;font-weight:800;line-height:1.4}
 .episode-play:focus-visible,.tip-button:focus-visible{outline:3px solid #93c5fd;outline-offset:-3px}
 .tip-button{align-self:center;flex:0 0 auto;border:0;border-radius:999px;background:#2563eb;color:#fff;margin-right:16px;padding:9px 17px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 9px #2563eb33}
 .tip-button:hover{background:#1d4ed8;transform:translateY(-1px)}
@@ -52,7 +52,6 @@ main{max-width:1180px;margin:auto;padding:18px}
 <header class="top">
   <button id="backBtn" class="btn sub hidden">←</button>
   <div><h1 id="pageTitle">자취 시뮬레이터</h1><p id="pageSub"></p></div>
-  <button id="adminBtn" class="btn sub">⚙ 관리자</button>
 </header>
 
 <main>
@@ -826,11 +825,29 @@ $("#previousScene").onclick=e=>{
 };
 $("#restartPlayer").onclick=()=>{sceneIndex=0;renderPlay()};
 
-$("#adminBtn").onclick=()=>{if(!adminUnlocked){$("#loginModal").classList.remove("hidden");$("#password").focus()}else showAdmin()};
 $("#confirmLogin").onclick=()=>{if($("#password").value==="0070"){adminUnlocked=true;$("#loginModal").classList.add("hidden");showAdmin()}else $("#loginError").classList.remove("hidden")};
 $("#cancelLogin").onclick=()=>$("#loginModal").classList.add("hidden");
 function showAdmin(){$("#listView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#backBtn").classList.remove("hidden");$("#pageTitle").textContent="관리자 모드";$("#pageSub").textContent="JSON 에피소드와 장면을 편집합니다."}
-$("#backBtn").onclick=()=>{$("#adminView").classList.add("hidden");$("#listView").classList.remove("hidden");$("#backBtn").classList.add("hidden");$("#pageTitle").textContent="자취 상황 시뮬레이터";$("#pageSub").textContent=""}
+$("#backBtn").onclick=()=>{$("#adminView").classList.add("hidden");$("#listView").classList.remove("hidden");$("#backBtn").classList.add("hidden");$("#pageTitle").textContent="자취 시뮬레이터";$("#pageSub").textContent=""}
+
+let adminKeyBuffer="";
+let adminKeyTimer=0;
+document.addEventListener("keydown",e=>{
+  if(!$("#listView") || $("#listView").classList.contains("hidden"))return;
+  if(e.ctrlKey||e.altKey||e.metaKey)return;
+  const target=e.target;
+  if(target&&target.closest&&target.closest("input,textarea,select,[contenteditable='true']"))return;
+  if(!/^\d$/.test(e.key)){adminKeyBuffer="";return}
+  clearTimeout(adminKeyTimer);
+  adminKeyBuffer=(adminKeyBuffer+e.key).slice(-4);
+  if(adminKeyBuffer==="0070"){
+    adminKeyBuffer="";
+    adminUnlocked=true;
+    showAdmin();
+    return;
+  }
+  adminKeyTimer=setTimeout(()=>{adminKeyBuffer=""},1500);
+});
 
 $("#password").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
