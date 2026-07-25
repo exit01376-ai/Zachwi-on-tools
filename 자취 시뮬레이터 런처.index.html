@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>자취 시뮬레이터 v22</title>
+<title>자취 시뮬레이터</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:#f4f6f8;color:#111827}
 button,input,textarea,select{font:inherit}.hidden{display:none!important}.top{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:20}
 .top h1{margin:0;font-size:20px}.top p{margin:3px 0 0;color:#6b7280;font-size:13px}.top>div{flex:1}
-.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer;background:#2563eb;color:#fff}.btn.sub{background:#eef2f7;color:#111827}.btn.danger{background:#fee2e2;color:#991b1b}.btn.small{padding:7px 10px;font-size:13px}
+.btn{border:0;border-radius:11px;padding:10px 14px;font-weight:750;cursor:pointer;background:#2f8f46;color:#fff}.btn:hover{background:#24733a}.btn.sub{background:#eef2f7;color:#111827}.btn.sub:hover{background:#e2e8f0}.btn.danger{background:#fee2e2;color:#991b1b}.btn.danger:hover{background:#fecaca}.btn.small{padding:7px 10px;font-size:13px}
 main{max-width:1180px;margin:auto;padding:18px}
 .grid{display:grid;grid-template-columns:1fr;gap:12px}
-.episode-card{width:100%;min-height:72px;display:flex;align-items:stretch;background:#eef4ff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 3px 12px #0f172a0a;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
-.episode-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px #0f172a12;border-color:#bfdbfe}
-.episode-play{flex:1;border:0;background:transparent;padding:18px 22px;cursor:pointer;text-align:left;color:#1e3a5f;font-size:19px;font-weight:800;line-height:1.4}
-.episode-play:focus-visible,.tip-button:focus-visible{outline:3px solid #93c5fd;outline-offset:-3px}
-.tip-button{align-self:center;flex:0 0 auto;border:0;border-radius:999px;background:#2563eb;color:#fff;margin-right:16px;padding:9px 17px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 9px #2563eb33}
-.tip-button:hover{background:#1d4ed8;transform:translateY(-1px)}
+.episode-card{width:100%;min-height:72px;display:flex;align-items:stretch;background:#eef9df;border:1px solid #cee6b6;border-radius:16px;box-shadow:0 3px 12px #0f172a0a;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.episode-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px #0f172a12;border-color:#a8cf82}
+.episode-play{flex:1;border:0;background:transparent;padding:18px 22px;cursor:pointer;text-align:left;color:#365b2b;font-size:19px;font-weight:800;line-height:1.4}
+.episode-play:focus-visible,.tip-button:focus-visible{outline:3px solid #86c98f;outline-offset:-3px}
+.tip-button{align-self:center;flex:0 0 auto;border:0;border-radius:999px;background:#2f8f46;color:#fff;margin-right:16px;padding:9px 17px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 3px 9px #2f8f463d}
+.tip-button:hover{background:#24733a;transform:translateY(-1px)}
 .tip-button:active{transform:translateY(0)}
 .card,.panel{background:#fff;border:1px solid #e5e7eb;border-radius:17px;overflow:hidden}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#dbeafe}
 .body{padding:15px}.body h3{margin:6px 0}.body p{margin:5px 0 13px;color:#6b7280;min-height:42px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -24,12 +24,12 @@ main{max-width:1180px;margin:auto;padding:18px}
 .upload input{display:none}.empty{text-align:center;color:#6b7280;padding:80px 10px}
 .modal{position:fixed;inset:0;z-index:100;background:#0009;display:grid;place-items:center;padding:14px}.modal-card{width:min(96vw,1020px);max-height:94vh;overflow:auto;background:#fff;border-radius:18px;padding:20px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:13px;font-weight:750;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.field textarea{min-height:90px;resize:vertical}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{background:#eef2f7;color:#374151}.tab.active{background:#2563eb;color:#fff}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{background:#eef2f7;color:#374151}.tab.active{background:#2f8f46;color:#fff}.tab.active:hover{background:#24733a}
 .asset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.asset-card{border:1px solid #e5e7eb;border-radius:13px;padding:12px}.asset-preview{width:100%;height:150px;object-fit:contain;background:#eef2f7;border-radius:10px;margin:8px 0}.asset-id{font-weight:800;word-break:break-all}
 .scene-card{border:1px solid #e5e7eb;border-radius:14px;padding:14px;margin:12px 0}.scene-card.active{outline:3px solid #bfdbfe}.preview-box{border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;background:#111;position:relative;aspect-ratio:16/9;margin:14px 0}.preview-box img.bg{width:100%;height:100%;object-fit:cover}.preview-box img.char{position:absolute;left:50%;bottom:0;transform:translateX(-50%);max-height:85%;max-width:70%;object-fit:contain}
 .preview-reference{position:absolute;object-fit:contain;cursor:move;z-index:4;user-select:none;touch-action:none}
 .preview-reference.selected{outline:2px dashed #60a5fa;outline-offset:2px}
-.reference-handle{position:absolute;width:18px;height:18px;border-radius:50%;background:#2563eb;border:2px solid #fff;z-index:6;cursor:nwse-resize;touch-action:none;box-shadow:0 1px 5px #0005}
+.reference-handle{position:absolute;width:18px;height:18px;border-radius:50%;background:#2f8f46;border:2px solid #fff;z-index:6;cursor:nwse-resize;touch-action:none;box-shadow:0 1px 5px #0005}
 .reference-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;margin:-4px 0 14px}
 .scene-preview-panel{margin:0 0 18px;padding:14px;background:#f8fafc;border:1px solid #dbe3ee;border-radius:16px;box-shadow:0 5px 16px #0f172a0d}
 .reference-controls label{font-size:12px;font-weight:750;color:#475569}
@@ -40,7 +40,7 @@ main{max-width:1180px;margin:auto;padding:18px}
 .player{position:fixed;inset:0;background:#111;z-index:80}.player-bg{width:100%;height:100%;object-fit:cover}.player-char{position:absolute;left:50%;bottom:0;transform:translateX(-50%);max-height:84%;max-width:76%;object-fit:contain}
 .dialog{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(94%,900px);background:rgba(17,17,17,.6);color:#fff;border:1px solid #ffffff55;border-radius:16px;padding:17px;transition:padding .18s ease,max-height .18s ease}.speaker{font-weight:800;color:#bfdbfe}.dialog-text{font-size:18px;line-height:1.55;margin-top:7px}
 .player-tools{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;z-index:10}.player-tools button{background:#000b;color:#fff}.player-nav{display:flex;gap:8px}.player-tools button:disabled{opacity:.42;cursor:not-allowed}
-.choice-wrap{display:grid;gap:5px;margin-top:8px}.choice{width:100%;text-align:left;padding:9px 12px;min-height:0}.dialog.choice-mode{padding:11px 17px;max-height:61vh}.dialog.choice-mode .dialog-text{font-size:17px;line-height:1.38;margin-top:4px}.dialog.choice-mode .choice-wrap{gap:5px;margin-top:7px}.dialog.choice-mode .choice{padding:8px 12px}
+.choice-wrap{display:grid;gap:5px;margin-top:8px}.choice{width:100%;text-align:left;padding:9px 12px;min-height:0;background:#eaf7dc;color:#244a2b;border:1px solid #b9dda0}.choice:hover{background:#dff1cc}.dialog.choice-mode{padding:11px 17px;max-height:61vh}.dialog.choice-mode .dialog-text{font-size:17px;line-height:1.38;margin-top:4px}.dialog.choice-mode .choice-wrap{gap:5px;margin-top:7px}.dialog.choice-mode .choice{padding:8px 12px}
 .version-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
 .version-btn{padding:18px;font-size:17px}
 .tip-list{display:grid;gap:10px;margin:14px 0}.tip-item{background:#fff;color:#111827;border-radius:12px;padding:12px 14px;line-height:1.5}
@@ -52,7 +52,6 @@ main{max-width:1180px;margin:auto;padding:18px}
 <header class="top">
   <button id="backBtn" class="btn sub hidden">←</button>
   <div><h1 id="pageTitle">자취 시뮬레이터</h1><p id="pageSub"></p></div>
-  <button id="adminBtn" class="btn sub">⚙ 관리자</button>
 </header>
 
 <main>
@@ -826,11 +825,29 @@ $("#previousScene").onclick=e=>{
 };
 $("#restartPlayer").onclick=()=>{sceneIndex=0;renderPlay()};
 
-$("#adminBtn").onclick=()=>{if(!adminUnlocked){$("#loginModal").classList.remove("hidden");$("#password").focus()}else showAdmin()};
 $("#confirmLogin").onclick=()=>{if($("#password").value==="0070"){adminUnlocked=true;$("#loginModal").classList.add("hidden");showAdmin()}else $("#loginError").classList.remove("hidden")};
 $("#cancelLogin").onclick=()=>$("#loginModal").classList.add("hidden");
 function showAdmin(){$("#listView").classList.add("hidden");$("#adminView").classList.remove("hidden");$("#backBtn").classList.remove("hidden");$("#pageTitle").textContent="관리자 모드";$("#pageSub").textContent="JSON 에피소드와 장면을 편집합니다."}
-$("#backBtn").onclick=()=>{$("#adminView").classList.add("hidden");$("#listView").classList.remove("hidden");$("#backBtn").classList.add("hidden");$("#pageTitle").textContent="자취 상황 시뮬레이터";$("#pageSub").textContent=""}
+$("#backBtn").onclick=()=>{$("#adminView").classList.add("hidden");$("#listView").classList.remove("hidden");$("#backBtn").classList.add("hidden");$("#pageTitle").textContent="자취 시뮬레이터";$("#pageSub").textContent=""}
+
+let adminKeyBuffer="";
+let adminKeyTimer=0;
+document.addEventListener("keydown",e=>{
+  if(!$("#listView") || $("#listView").classList.contains("hidden"))return;
+  if(e.ctrlKey||e.altKey||e.metaKey)return;
+  const target=e.target;
+  if(target&&target.closest&&target.closest("input,textarea,select,[contenteditable='true']"))return;
+  if(!/^\d$/.test(e.key)){adminKeyBuffer="";return}
+  clearTimeout(adminKeyTimer);
+  adminKeyBuffer=(adminKeyBuffer+e.key).slice(-4);
+  if(adminKeyBuffer==="0070"){
+    adminKeyBuffer="";
+    adminUnlocked=true;
+    showAdmin();
+    return;
+  }
+  adminKeyTimer=setTimeout(()=>{adminKeyBuffer=""},1500);
+});
 
 $("#password").addEventListener("keydown",e=>{
   if(e.key==="Enter"){
