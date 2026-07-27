@@ -1,0 +1,1787 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#F7F8F2" />
+  <title>분리수거 게임</title>
+  <style>
+    :root {
+      --bg: #F7F8F2;
+      --card: #FFFFFF;
+      --text: #1D2A22;
+      --muted: #6D786F;
+      --line: #E4E8E1;
+      --green: #2E7D5B;
+      --green-2: #DDF1E7;
+      --yellow: #F4C95D;
+      --red: #D85858;
+      --shadow: 0 16px 45px rgba(39, 62, 48, 0.10);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(244,201,93,.24), transparent 32%),
+        linear-gradient(180deg, #FBFCF8 0%, var(--bg) 100%);
+      font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      width: min(100%, 480px);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--green-2);
+      font-size: 22px;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sound-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.85);
+      cursor: pointer;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      padding: 12px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.78);
+      text-align: center;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      margin-top: 3px;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .game-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 300px;
+      padding: 22px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(228,232,225,.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .game-card::after {
+      content: "";
+      position: absolute;
+      right: -55px;
+      top: -55px;
+      width: 155px;
+      height: 155px;
+      border-radius: 50%;
+      background: var(--green-2);
+      opacity: .75;
+    }
+
+    .prompt {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--green);
+      background: var(--green-2);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badges { display:flex; gap:6px; margin-top:10px; }
+    .badges span { padding:5px 8px; border-radius:999px; background:#F2F5F1; color:var(--muted); font-size:11px; font-weight:800; }
+    #regionalBadge { background:#FFF3D3; color:#8A6414; }
+
+    .item-wrap {
+      min-height: 185px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .item-emoji {
+      font-size: 88px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 10px rgba(29,42,34,.12));
+      transform-origin: center;
+    }
+
+    .item-name {
+      margin-top: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .item-tip {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress {
+      height: 9px;
+      border-radius: 999px;
+      background: #EEF1EC;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--green), #65A982);
+      border-radius: inherit;
+      transition: width .25s linear;
+    }
+
+    .bins {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .bin {
+      min-height: 78px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.9);
+      padding: 10px 9px;
+      cursor: pointer;
+      transition: transform .14s ease, border-color .14s ease, background .14s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .bin:active { transform: scale(.98); }
+    .bin:hover { border-color: #B8D6C6; background: #FBFFFC; }
+    .bin:focus-visible { outline: 3px solid rgba(46,125,91,.25); outline-offset: 2px; }
+
+    .bin-icon {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #F2F5F1;
+      font-size: 24px;
+    }
+
+    .bin strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+
+    .bin span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .message {
+      min-height: 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .message.ok { color: var(--green); }
+    .message.no { color: var(--red); }
+
+
+    .answer-flash {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(21,32,25,.28);
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+
+    .answer-flash[hidden] { display: none; }
+
+    .answer-flash-card {
+      width: min(88vw, 390px);
+      padding: 24px 22px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 22px 60px rgba(20,38,27,.24);
+      text-align: center;
+      animation: flashIn .18s ease;
+    }
+
+    .answer-flash-title {
+      margin-bottom: 10px;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--red);
+    }
+
+    .answer-flash-text {
+      font-size: 17px;
+      line-height: 1.55;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    @keyframes flashIn {
+      from { opacity: 0; transform: translateY(8px) scale(.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(21,32,25,.42);
+      backdrop-filter: blur(7px);
+    }
+
+    .overlay[hidden] { display: none; }
+
+    .modal {
+      width: min(100%, 420px);
+      border-radius: 28px;
+      background: #fff;
+      padding: 28px 24px 24px;
+      text-align: center;
+      box-shadow: 0 24px 70px rgba(16,31,22,.22);
+    }
+
+    .modal-emoji { font-size: 58px; }
+    .modal h1 {
+      margin: 12px 0 8px;
+      font-size: 28px;
+      letter-spacing: -.05em;
+    }
+    .modal p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .result-score {
+      margin: 20px 0;
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--green-2);
+    }
+
+    .result-score b {
+      display: block;
+      font-size: 34px;
+      color: var(--green);
+    }
+
+    .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 15px 18px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(46,125,91,.22);
+    }
+
+    .secondary-note {
+      margin-top: 14px !important;
+      font-size: 12px !important;
+    }
+
+    .shake { animation: shake .28s ease; }
+    .pop { animation: pop .28s ease; }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(.86); }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @media (min-width: 700px) {
+      .app { padding-top: 30px; }
+      .game-card { min-height: 330px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="분리수거 미니게임">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">♻️</div>
+        <div class="brand-text">
+          <strong>분리수거 게임</strong>
+          <span>자취력 테스트 · 30초</span>
+        </div>
+      </div>
+      <button class="sound-btn" id="soundBtn" aria-label="효과음 켜기 또는 끄기">🔊</button>
+    </header>
+
+    <section class="status" aria-label="게임 상태">
+      <div class="stat">
+        <div class="stat-label">점수</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">콤보</div>
+        <div class="stat-value" id="combo">x0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">남은 시간</div>
+        <div class="stat-value"><span id="time">45</span>초</div>
+      </div>
+    </section>
+
+    <section class="game-card" id="gameCard">
+      <div class="prompt">
+        <div class="eyebrow">이 물건은 어디로?</div>
+        <div class="badges"><span id="difficultyBadge">쉬움</span><span id="regionalBadge" hidden>지역 확인</span></div>
+      </div>
+
+      <div class="item-wrap">
+        <div>
+          <div class="item-emoji" id="itemEmoji" aria-hidden="true">🧴</div>
+          <div class="item-name" id="itemName">빈 샴푸통</div>
+          <div class="item-tip" id="itemTip">내용물을 비우고 헹군 상태</div>
+        </div>
+      </div>
+
+      <div class="progress" aria-label="남은 시간">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </section>
+
+    <section class="bins" aria-label="분리수거함 선택">
+      <button class="bin" data-category="general"><span class="bin-icon">🗑️</span><span><strong>일반</strong><span>종량제·불연성</span></span></button>
+      <button class="bin" data-category="plastic"><span class="bin-icon">🧴</span><span><strong>플라스틱·비닐</strong><span>비우고 헹구기</span></span></button>
+      <button class="bin" data-category="paper"><span class="bin-icon">📦</span><span><strong>종이·종이팩</strong><span>오염·코팅 확인</span></span></button>
+      <button class="bin" data-category="metalGlass"><span class="bin-icon">🥫</span><span><strong>캔·유리·고철</strong><span>다른 재질 분리</span></span></button>
+      <button class="bin" data-category="food"><span class="bin-icon">🍌</span><span><strong>음식물</strong><span>지역 기준 확인</span></span></button>
+      <button class="bin" data-category="special"><span class="bin-icon">🔋</span><span><strong>전용 수거</strong><span>전지·약·가전</span></span></button>
+    </section>
+
+
+    <div class="answer-flash" id="answerFlash" hidden>
+      <div class="answer-flash-card">
+        <div class="answer-flash-title" id="answerFlashTitle">오답</div>
+        <div class="answer-flash-text" id="answerFlashText"></div>
+      </div>
+    </div>
+
+    <div class="message" id="message" role="status" aria-live="polite"></div>
+  </main>
+
+  <div class="overlay" id="startOverlay">
+    <div class="modal">
+      <div class="modal-emoji">♻️</div>
+      <h1>분리배출, 자신 있어?</h1>
+      <p>30초 동안 알맞은 배출 방법을 골라 보세요.<br>틀리면 해설을 보고 정답을 맞힐 때까지 다시 선택합니다.</p>
+      <div class="result-score">
+        <b>30초</b>
+        헷갈리는 생활 쓰레기 134종
+      </div>
+      <button class="primary" id="startBtn">게임 시작</button>
+      <p class="secondary-note">‘지역 확인’ 품목은 거주지 지자체 기준이 우선이에요.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="endOverlay" hidden>
+    <div class="modal">
+      <div class="modal-emoji" id="resultEmoji">🌱</div>
+      <h1 id="resultTitle">자취 새싹</h1>
+      <p id="resultText">조금만 더 익히면 분리수거 고수가 될 수 있어요.</p>
+      <div class="result-score">
+        <b><span id="finalScore">0</span>점</b>
+        최고 콤보 <span id="bestCombo">0</span>
+      </div>
+      <button class="primary" id="restartBtn">한 번 더</button>
+      <p class="secondary-note">앱 보상 연동은 코드의 game:finished 이벤트를 사용하세요.</p>
+    </div>
+  </div>
+
+  <script>
+    
+    const ITEMS = [
+  {
+    "name": "빈 생수 페트병",
+    "emoji": "🧴",
+    "category": "plastic",
+    "explanation": "라벨과 뚜껑을 분리하고 비운 뒤 투명 페트병으로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "빈 샴푸통",
+    "emoji": "🧴",
+    "category": "plastic",
+    "explanation": "내용물을 비우고 물로 헹군 뒤 플라스틱으로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "깨끗한 택배 상자",
+    "emoji": "📦",
+    "category": "paper",
+    "explanation": "테이프·송장·철심을 제거하고 접어서 종이류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "음료 알루미늄 캔",
+    "emoji": "🥫",
+    "category": "metalGlass",
+    "explanation": "내용물을 비우고 헹군 뒤 캔류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "음료 유리병",
+    "emoji": "🍾",
+    "category": "metalGlass",
+    "explanation": "내용물을 비우고 뚜껑을 분리해 유리병류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "바나나 껍질",
+    "emoji": "🍌",
+    "category": "food",
+    "explanation": "수분을 줄여 음식물쓰레기로 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "사과 껍질",
+    "emoji": "🍎",
+    "category": "food",
+    "explanation": "일반적으로 음식물쓰레기지만 지역 기준을 확인해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "사용한 휴지",
+    "emoji": "🧻",
+    "category": "general",
+    "explanation": "오염된 휴지는 종이로 재활용할 수 없어 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "마스크",
+    "emoji": "😷",
+    "category": "general",
+    "explanation": "재활용이 어려운 복합재질이라 일반쓰레기로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "칫솔",
+    "emoji": "🪥",
+    "category": "general",
+    "explanation": "플라스틱과 솔이 섞인 복합재질이라 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "깨끗한 종이 쇼핑백",
+    "emoji": "🛍️",
+    "category": "paper",
+    "explanation": "비닐 코팅이 없고 깨끗하면 손잡이를 제거해 종이류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "휴지심",
+    "emoji": "🧻",
+    "category": "paper",
+    "explanation": "깨끗한 종이 재질이므로 종이류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "빈 통조림 캔",
+    "emoji": "🥫",
+    "category": "metalGlass",
+    "explanation": "내용물을 비우고 헹군 뒤 캔류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "깨끗한 플라스틱 배달 용기",
+    "emoji": "🥡",
+    "category": "plastic",
+    "explanation": "음식물을 완전히 제거하고 헹군 뒤 플라스틱으로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "오염된 플라스틱 배달 용기",
+    "emoji": "🥡",
+    "category": "general",
+    "explanation": "세척해도 오염이 남으면 종량제봉투에 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "깨끗한 비닐봉지",
+    "emoji": "🛍️",
+    "category": "plastic",
+    "explanation": "내용물을 비우고 깨끗한 비닐만 비닐류로 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "오염된 비닐봉지",
+    "emoji": "🛍️",
+    "category": "general",
+    "explanation": "기름·양념이 지워지지 않으면 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "종이 계란판",
+    "emoji": "🥚",
+    "category": "paper",
+    "explanation": "깨끗하고 마른 종이 계란판은 종이류로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "스티로폼 완충재",
+    "emoji": "⬜",
+    "category": "plastic",
+    "explanation": "테이프와 이물질을 제거한 흰색 스티로폼은 별도 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "고무장갑",
+    "emoji": "🧤",
+    "category": "general",
+    "explanation": "고무 제품은 재활용품이 아니므로 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "물티슈",
+    "emoji": "🧻",
+    "category": "general",
+    "explanation": "종이가 아닌 합성섬유가 포함되어 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "라면 봉지",
+    "emoji": "🍜",
+    "category": "plastic",
+    "explanation": "내용물을 비우고 깨끗하면 비닐류로 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "과자 봉지",
+    "emoji": "🍪",
+    "category": "plastic",
+    "explanation": "내용물을 털고 깨끗하면 비닐류로 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "달걀 껍데기",
+    "emoji": "🥚",
+    "category": "general",
+    "explanation": "사료·퇴비화가 어려워 일반쓰레기로 분류돼요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "조개껍데기",
+    "emoji": "🐚",
+    "category": "general",
+    "explanation": "단단한 껍데기는 음식물쓰레기가 아니라 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "닭뼈",
+    "emoji": "🍗",
+    "category": "general",
+    "explanation": "단단한 뼈는 음식물쓰레기가 아니라 일반쓰레기예요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "커피 찌꺼기",
+    "emoji": "☕",
+    "category": "general",
+    "explanation": "대부분 지역에서 일반쓰레기로 배출하지만 지역 기준을 확인해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "채소 손질 부산물",
+    "emoji": "🥬",
+    "category": "food",
+    "explanation": "부드러운 채소 껍질과 잎은 보통 음식물쓰레기예요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "빈 세제 용기",
+    "emoji": "🧴",
+    "category": "plastic",
+    "explanation": "내용물을 비우고 헹군 뒤 플라스틱으로 배출해요.",
+    "difficulty": 1,
+    "regional": false
+  },
+  {
+    "name": "빈 화장품 유리병",
+    "emoji": "🧴",
+    "category": "metalGlass",
+    "explanation": "내용물을 비우고 펌프 등 다른 재질을 분리한 뒤 유리병류로 배출해요.",
+    "difficulty": 1,
+    "regional": true
+  },
+  {
+    "name": "영수증",
+    "emoji": "🧾",
+    "category": "general",
+    "explanation": "감열지는 재활용이 어려워 종량제봉투에 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "택배 송장",
+    "emoji": "🏷️",
+    "category": "general",
+    "explanation": "코팅·접착제가 묻은 송장은 종이류에서 떼어 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "기름 묻은 치킨 상자",
+    "emoji": "📦",
+    "category": "general",
+    "explanation": "기름과 음식물로 오염된 종이는 재활용할 수 없어요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "깨끗한 피자 상자 부분",
+    "emoji": "🍕",
+    "category": "paper",
+    "explanation": "기름이 묻지 않은 깨끗한 부분만 뜯어 종이류로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "기름 묻은 피자 상자 부분",
+    "emoji": "🍕",
+    "category": "general",
+    "explanation": "기름에 젖은 부분은 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "양면 코팅 종이컵",
+    "emoji": "🥤",
+    "category": "general",
+    "explanation": "코팅된 종이컵은 일반 종이류와 달라 종량제봉투 대상일 수 있어요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "종이팩 우유팩",
+    "emoji": "🥛",
+    "category": "paper",
+    "explanation": "내용물을 비우고 씻어 말린 뒤 종이팩 전용 수거함에 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "멸균팩 두유팩",
+    "emoji": "🧃",
+    "category": "paper",
+    "explanation": "씻고 말려 멸균팩 또는 종이팩 전용 수거함에 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "빨대",
+    "emoji": "🥤",
+    "category": "general",
+    "explanation": "작고 가벼워 선별이 어려우므로 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "일회용 플라스틱 숟가락",
+    "emoji": "🥄",
+    "category": "general",
+    "explanation": "소형 플라스틱 제품은 선별이 어려워 일반쓰레기인 경우가 많아요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "치약 튜브",
+    "emoji": "🪥",
+    "category": "general",
+    "explanation": "여러 재질이 섞이고 세척이 어려워 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "알약 포장재 PTP",
+    "emoji": "💊",
+    "category": "general",
+    "explanation": "플라스틱과 알루미늄이 붙은 복합재질이라 일반쓰레기예요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "빈 약 종이상자",
+    "emoji": "📦",
+    "category": "paper",
+    "explanation": "약과 비닐 포장을 제거한 깨끗한 상자만 종이류로 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "남은 알약",
+    "emoji": "💊",
+    "category": "special",
+    "explanation": "폐의약품은 약국·보건소·주민센터 등 지역 전용수거처에 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "남은 물약",
+    "emoji": "🧪",
+    "category": "special",
+    "explanation": "용기째 밀봉해 지역 폐의약품 전용수거처에 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "건전지",
+    "emoji": "🔋",
+    "category": "special",
+    "explanation": "전용 폐건전지 수거함에 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "보조배터리",
+    "emoji": "🔋",
+    "category": "special",
+    "explanation": "화재 위험이 있어 전지류 또는 소형폐가전 수거함에 별도 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "형광등",
+    "emoji": "💡",
+    "category": "special",
+    "explanation": "깨뜨리지 말고 폐형광등 전용수거함에 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "LED 전구",
+    "emoji": "💡",
+    "category": "special",
+    "explanation": "지역의 폐조명·소형폐가전 수거 기준을 확인해 별도 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "깨진 유리컵",
+    "emoji": "💥",
+    "category": "general",
+    "explanation": "소량은 안전하게 싸서 종량제봉투, 다량은 특수규격마대 등 지역 기준을 따라요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "도자기 그릇",
+    "emoji": "🍽️",
+    "category": "general",
+    "explanation": "유리병류가 아니며 특수규격마대 또는 종량제 등 지역 기준을 따라요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "내열 유리 냄비",
+    "emoji": "🍲",
+    "category": "general",
+    "explanation": "일반 유리병과 성분이 달라 유리병 수거함에 넣지 않아요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "거울",
+    "emoji": "🪞",
+    "category": "general",
+    "explanation": "판유리류로 유리병 수거함 대상이 아니며 지역 기준에 따라 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "알루미늄 포일",
+    "emoji": "✨",
+    "category": "general",
+    "explanation": "얇고 오염되기 쉬워 일반쓰레기로 안내되는 경우가 많아요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "부탄가스 캔",
+    "emoji": "🧯",
+    "category": "metalGlass",
+    "explanation": "내용물을 완전히 사용하고 환기되는 곳에서 구멍 여부 등 지역 기준을 확인해 캔류로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "스프레이 캔",
+    "emoji": "🧴",
+    "category": "metalGlass",
+    "explanation": "내용물과 가스를 완전히 제거한 뒤 지역 지침에 따라 캔류로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "페인트가 남은 캔",
+    "emoji": "🥫",
+    "category": "special",
+    "explanation": "내용물이 남은 용기는 생활계 유해폐기물 기준에 따라 별도 처리해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "깨끗한 요거트 컵",
+    "emoji": "🥣",
+    "category": "plastic",
+    "explanation": "은박 뚜껑을 떼고 씻은 뒤 플라스틱으로 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "내용물 남은 요거트 컵",
+    "emoji": "🥣",
+    "category": "general",
+    "explanation": "내용물이 남고 세척되지 않으면 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "스티로폼 컵라면 용기",
+    "emoji": "🍜",
+    "category": "plastic",
+    "explanation": "세척해 깨끗한 경우만 스티로폼류로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "국물 밴 컵라면 용기",
+    "emoji": "🍜",
+    "category": "general",
+    "explanation": "색과 냄새가 배어 세척이 어렵다면 일반쓰레기예요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "과일 포장 스티로폼 망",
+    "emoji": "🍐",
+    "category": "general",
+    "explanation": "작고 다른 재질이 섞여 일반쓰레기로 안내되는 경우가 많아요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "아이스팩 물 타입",
+    "emoji": "🧊",
+    "category": "general",
+    "explanation": "물을 버리고 겉비닐은 깨끗하면 비닐류, 통째로는 지역 기준을 확인해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "아이스팩 젤 타입",
+    "emoji": "🧊",
+    "category": "general",
+    "explanation": "내용물을 하수구에 버리지 말고 통째로 종량제 또는 전용수거함 기준을 확인해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "종이 완충재",
+    "emoji": "📜",
+    "category": "paper",
+    "explanation": "테이프와 비닐을 제거한 깨끗한 종이 완충재는 종이류예요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "비닐 코팅 쇼핑백",
+    "emoji": "🛍️",
+    "category": "general",
+    "explanation": "코팅된 종이는 일반 종이류로 재활용하기 어려워요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "철제 옷걸이",
+    "emoji": "👕",
+    "category": "metalGlass",
+    "explanation": "다른 재질을 제거할 수 있으면 고철류로 배출해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "플라스틱·철 혼합 옷걸이",
+    "emoji": "👕",
+    "category": "general",
+    "explanation": "재질 분리가 어려운 혼합 옷걸이는 일반쓰레기예요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "우산",
+    "emoji": "☂️",
+    "category": "general",
+    "explanation": "여러 재질이 섞인 생활용품으로 대형·일반 폐기물 기준을 확인해요.",
+    "difficulty": 2,
+    "regional": true
+  },
+  {
+    "name": "CD·DVD",
+    "emoji": "💿",
+    "category": "general",
+    "explanation": "복합 플라스틱 제품이라 일반쓰레기로 배출해요.",
+    "difficulty": 2,
+    "regional": false
+  },
+  {
+    "name": "깨끗한 즉석밥 용기",
+    "emoji": "🍚",
+    "category": "plastic",
+    "explanation": "분리배출 표시를 확인하고 깨끗이 씻은 뒤 플라스틱으로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "색이 밴 즉석밥 용기",
+    "emoji": "🍚",
+    "category": "general",
+    "explanation": "오염과 색이 제거되지 않으면 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "검은색 플라스틱 트레이",
+    "emoji": "⬛",
+    "category": "plastic",
+    "explanation": "분리배출 표시가 있고 깨끗하면 플라스틱이지만 지역 선별 기준 차이가 있어요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "투명 과일 트레이",
+    "emoji": "🍓",
+    "category": "plastic",
+    "explanation": "스티커와 흡수패드를 제거하고 씻어 플라스틱으로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "고기 흡수패드",
+    "emoji": "🥩",
+    "category": "general",
+    "explanation": "오염된 복합재질이므로 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "플라스틱 라벨",
+    "emoji": "🏷️",
+    "category": "plastic",
+    "explanation": "깨끗한 동일 재질 라벨은 플라스틱·비닐류로, 접착 오염이 심하면 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "병뚜껑 금속",
+    "emoji": "🧢",
+    "category": "metalGlass",
+    "explanation": "병에서 분리해 캔·고철류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "페트병 뚜껑",
+    "emoji": "🧢",
+    "category": "plastic",
+    "explanation": "병과 분리해 플라스틱으로 배출하되 지역 안내를 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "소주병",
+    "emoji": "🍾",
+    "category": "metalGlass",
+    "explanation": "내용물을 비우고 유리병 또는 빈용기 보증금 반환 대상이면 소매점에 반환해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "맥주병",
+    "emoji": "🍺",
+    "category": "metalGlass",
+    "explanation": "보증금 대상 병은 소매점 반환이 우선이며, 일반 유리병 배출도 지역 기준을 따라요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "화장품 펌프",
+    "emoji": "🧴",
+    "category": "general",
+    "explanation": "금속 스프링 등 복합재질이라 본체에서 분리해 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "화장품 플라스틱 뚜껑",
+    "emoji": "🧢",
+    "category": "plastic",
+    "explanation": "내용물을 닦아낸 깨끗한 단일 플라스틱 뚜껑은 플라스틱류예요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "매니큐어 병",
+    "emoji": "💅",
+    "category": "general",
+    "explanation": "내용물 제거가 어렵고 화학물질이 남을 수 있어 지역 유해폐기물 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "향수 유리병",
+    "emoji": "🧴",
+    "category": "metalGlass",
+    "explanation": "내용물을 완전히 비우고 펌프를 분리할 수 있을 때 유리병류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "깨끗한 플라스틱 화분",
+    "emoji": "🪴",
+    "category": "plastic",
+    "explanation": "흙과 이물질을 제거하고 분리배출 표시·지역 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "흙 묻은 플라스틱 화분",
+    "emoji": "🪴",
+    "category": "general",
+    "explanation": "흙과 오염을 제거할 수 없으면 일반 또는 대형폐기물 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "작은 프라이팬",
+    "emoji": "🍳",
+    "category": "metalGlass",
+    "explanation": "손잡이 등 다른 재질을 제거할 수 있으면 고철류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "코팅 프라이팬",
+    "emoji": "🍳",
+    "category": "metalGlass",
+    "explanation": "지역에 따라 고철류 또는 대형폐기물로 배출하므로 지자체 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "식칼",
+    "emoji": "🔪",
+    "category": "metalGlass",
+    "explanation": "날을 두꺼운 종이로 감싸 표시한 뒤 고철 또는 특수배출 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "전선",
+    "emoji": "🔌",
+    "category": "special",
+    "explanation": "폐전선·소형가전 수거함 또는 지자체 수거 방식으로 별도 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "휴대전화",
+    "emoji": "📱",
+    "category": "special",
+    "explanation": "소형폐가전 수거함이나 제조사·판매점 회수처에 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "이어폰",
+    "emoji": "🎧",
+    "category": "special",
+    "explanation": "소형폐가전 수거함 등 지역 전자제품 회수 체계를 이용해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "전자담배 기기",
+    "emoji": "🔌",
+    "category": "special",
+    "explanation": "배터리 내장 전자기기는 일반쓰레기에 버리지 말고 전용 회수체계를 이용해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "잉크 카트리지",
+    "emoji": "🖨️",
+    "category": "special",
+    "explanation": "제조사 회수함이나 지역 특수품목 수거처를 이용해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "폐식용유",
+    "emoji": "🫗",
+    "category": "special",
+    "explanation": "공동주택·주민센터 전용 수거함이 있으면 이용하고, 지역 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "헌옷",
+    "emoji": "👕",
+    "category": "special",
+    "explanation": "깨끗하고 재사용 가능한 의류만 의류수거함에 넣어요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "젖거나 오염된 옷",
+    "emoji": "👕",
+    "category": "general",
+    "explanation": "재사용이 어렵다면 종량제 또는 대형폐기물 등 지역 기준을 따라요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "이불",
+    "emoji": "🛏️",
+    "category": "special",
+    "explanation": "의류수거함 대상이 아닌 경우가 많아 대형폐기물 등 지역 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "신발",
+    "emoji": "👟",
+    "category": "special",
+    "explanation": "재사용 가능한 신발만 의류수거함 가능 여부를 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "가죽 가방",
+    "emoji": "👜",
+    "category": "general",
+    "explanation": "재사용 수거 대상이 아니면 일반 또는 대형폐기물 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "나무젓가락",
+    "emoji": "🥢",
+    "category": "general",
+    "explanation": "오염된 목재 소형품은 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "이쑤시개",
+    "emoji": "🦷",
+    "category": "general",
+    "explanation": "작은 목재 생활쓰레기로 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "코르크 마개",
+    "emoji": "🍾",
+    "category": "general",
+    "explanation": "일반 재활용 체계 대상이 아니므로 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "티백",
+    "emoji": "🍵",
+    "category": "general",
+    "explanation": "끈·스테이플러·필터가 섞여 통째로 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "한약 찌꺼기",
+    "emoji": "🌿",
+    "category": "food",
+    "explanation": "지역에 따라 음식물 또는 일반쓰레기로 달라 지자체 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "옥수수 껍질",
+    "emoji": "🌽",
+    "category": "general",
+    "explanation": "질기고 섬유질이 많아 일반쓰레기로 안내되는 경우가 많아요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "양파 껍질",
+    "emoji": "🧅",
+    "category": "general",
+    "explanation": "마르고 질긴 껍질은 일반쓰레기로 안내되는 경우가 많아요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "파 뿌리",
+    "emoji": "🌱",
+    "category": "general",
+    "explanation": "흙과 질긴 뿌리는 일반쓰레기로 배출하는 지역이 많아요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "수박 껍질",
+    "emoji": "🍉",
+    "category": "food",
+    "explanation": "잘게 썰고 수분을 줄여 음식물쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "복숭아 씨",
+    "emoji": "🍑",
+    "category": "general",
+    "explanation": "단단한 씨앗은 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "호두 껍데기",
+    "emoji": "🌰",
+    "category": "general",
+    "explanation": "단단한 껍데기는 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "생선 뼈",
+    "emoji": "🐟",
+    "category": "general",
+    "explanation": "크고 단단한 뼈와 가시는 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "생선 내장",
+    "emoji": "🐟",
+    "category": "food",
+    "explanation": "일반적으로 음식물쓰레기지만 지역 지침을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "차 찌꺼기",
+    "emoji": "🍵",
+    "category": "general",
+    "explanation": "티백과 찻잎은 지역에 따라 달라 일반쓰레기로 안내되는 경우가 많아요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "나무 도마",
+    "emoji": "🪵",
+    "category": "general",
+    "explanation": "크기에 따라 종량제 또는 대형폐기물로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "플라스틱 도마",
+    "emoji": "🔲",
+    "category": "general",
+    "explanation": "생활 플라스틱 제품은 포장재와 달라 일반·대형폐기물 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "실리콘 조리도구",
+    "emoji": "🍴",
+    "category": "general",
+    "explanation": "실리콘 제품은 일반 재활용 대상이 아니므로 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "수세미",
+    "emoji": "🧽",
+    "category": "general",
+    "explanation": "오염된 합성재질 생활용품이라 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "면도기",
+    "emoji": "🪒",
+    "category": "general",
+    "explanation": "금속과 플라스틱이 섞인 복합재질이며 날을 안전하게 싸서 버려요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "일회용 라이터",
+    "emoji": "🔥",
+    "category": "special",
+    "explanation": "가스를 완전히 제거하고 지자체의 유해·특수폐기물 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "깨진 형광등",
+    "emoji": "💡",
+    "category": "special",
+    "explanation": "맨손으로 만지지 말고 지역의 폐형광등·유해폐기물 처리 기준을 따라요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "일회용 알루미늄 커피캡슐",
+    "emoji": "☕",
+    "category": "special",
+    "explanation": "커피 찌꺼기와 분리한 뒤 제조사·우체국 등 운영 중인 회수체계를 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "종이 코팅 아이스크림컵",
+    "emoji": "🍨",
+    "category": "general",
+    "explanation": "방수 코팅과 오염 때문에 일반 종이류로 재활용하기 어려워요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "아이스크림 나무 막대",
+    "emoji": "🍦",
+    "category": "general",
+    "explanation": "오염된 소형 목재이므로 일반쓰레기예요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "PVC 장판 조각",
+    "emoji": "🧱",
+    "category": "general",
+    "explanation": "포장재 플라스틱이 아니므로 종량제·특수규격마대 등 지역 기준을 따라요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "벽지 조각",
+    "emoji": "📜",
+    "category": "general",
+    "explanation": "코팅·풀 등이 묻은 건축성 생활폐기물로 지역 배출 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "꽃다발 포장 비닐",
+    "emoji": "💐",
+    "category": "plastic",
+    "explanation": "리본·철사·종이를 제거하고 깨끗한 비닐만 비닐류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "꽃다발 철사",
+    "emoji": "💐",
+    "category": "metalGlass",
+    "explanation": "다른 재질을 제거하고 안전하게 묶어 고철류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "말라버린 생화",
+    "emoji": "🌷",
+    "category": "general",
+    "explanation": "흙과 장식물을 제거하고 일반쓰레기로 배출하는 지역이 많아요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "깨끗한 종이봉투",
+    "emoji": "✉️",
+    "category": "paper",
+    "explanation": "비닐창·접착테이프를 제거하면 종이류로 배출할 수 있어요.",
+    "difficulty": 3,
+    "regional": false
+  },
+  {
+    "name": "뽁뽁이 에어캡",
+    "emoji": "🫧",
+    "category": "plastic",
+    "explanation": "테이프와 송장을 제거한 깨끗한 에어캡은 비닐류로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "보냉백 은박 포장재",
+    "emoji": "🧊",
+    "category": "general",
+    "explanation": "여러 재질이 접합된 복합재질이라 일반쓰레기로 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "택배 보냉 스티로폼 상자",
+    "emoji": "📦",
+    "category": "plastic",
+    "explanation": "테이프·송장·이물질을 제거한 흰색 스티로폼만 배출해요.",
+    "difficulty": 3,
+    "regional": true
+  },
+  {
+    "name": "색깔 있는 스티로폼",
+    "emoji": "🟦",
+    "category": "general",
+    "explanation": "지역 선별 기준에 따라 재활용이 제한될 수 있어 지자체 기준을 확인해요.",
+    "difficulty": 3,
+    "regional": true
+  }
+];
+
+
+    const GAME_SECONDS = 30;
+    const els = {
+      score: document.getElementById("score"),
+      combo: document.getElementById("combo"),
+      time: document.getElementById("time"),
+      itemEmoji: document.getElementById("itemEmoji"),
+      itemName: document.getElementById("itemName"),
+      itemTip: document.getElementById("itemTip"),
+      message: document.getElementById("message"),
+      progressFill: document.getElementById("progressFill"),
+      gameCard: document.getElementById("gameCard"),
+      startOverlay: document.getElementById("startOverlay"),
+      endOverlay: document.getElementById("endOverlay"),
+      startBtn: document.getElementById("startBtn"),
+      restartBtn: document.getElementById("restartBtn"),
+      finalScore: document.getElementById("finalScore"),
+      bestCombo: document.getElementById("bestCombo"),
+      resultEmoji: document.getElementById("resultEmoji"),
+      resultTitle: document.getElementById("resultTitle"),
+      resultText: document.getElementById("resultText"),
+      soundBtn: document.getElementById("soundBtn"),
+      difficultyBadge: document.getElementById("difficultyBadge"),
+      regionalBadge: document.getElementById("regionalBadge"),
+      answerFlash: document.getElementById("answerFlash"),
+      answerFlashTitle: document.getElementById("answerFlashTitle"),
+      answerFlashText: document.getElementById("answerFlashText")
+    };
+
+    let score = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let timeLeft = GAME_SECONDS;
+    let currentItem = ITEMS[0];
+    let running = false;
+    let timerId = null;
+    let soundOn = true;
+    let lastIndex = -1;
+
+    function currentDifficulty() {
+      const elapsed = GAME_SECONDS - timeLeft;
+      return elapsed < 10 ? 1 : elapsed < 20 ? 2 : 3;
+    }
+
+    function randomItem() {
+      const difficulty = currentDifficulty();
+      let pool = ITEMS.filter(item => item.difficulty === difficulty);
+      if (!pool.length) pool = ITEMS;
+      let item;
+      do item = pool[Math.floor(Math.random() * pool.length)];
+      while (item.name === currentItem?.name && pool.length > 1);
+      return item;
+    }
+
+    function renderItem() {
+      currentItem = randomItem();
+      els.itemEmoji.textContent = currentItem.emoji;
+      els.itemName.textContent = currentItem.name;
+      els.itemTip.textContent = "알맞은 배출함을 선택하세요";
+      const labels = {1:"쉬움",2:"보통",3:"어려움"};
+      els.difficultyBadge.textContent = labels[currentItem.difficulty];
+      els.regionalBadge.hidden = !currentItem.regional;
+      els.itemEmoji.classList.remove("pop");
+      void els.itemEmoji.offsetWidth;
+      els.itemEmoji.classList.add("pop");
+    }
+
+    function updateStatus() {
+      els.score.textContent = score;
+      els.combo.textContent = `x${combo}`;
+      els.time.textContent = timeLeft;
+      els.progressFill.style.width = `${(timeLeft / GAME_SECONDS) * 100}%`;
+    }
+
+    function beep(ok) {
+      if (!soundOn || !window.AudioContext && !window.webkitAudioContext) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = ok ? 720 : 180;
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    }
+
+    function showAnswerFlash(title, text, isCorrect) {
+      els.answerFlashTitle.textContent = title;
+      els.answerFlashText.textContent = text;
+      els.answerFlashTitle.style.color = isCorrect ? "var(--green)" : "var(--red)";
+      els.answerFlash.hidden = false;
+    }
+
+    function hideAnswerFlash() {
+      els.answerFlash.hidden = true;
+    }
+
+    function choose(category) {
+      if (!running || !els.answerFlash.hidden) return;
+
+      const correct = category === currentItem.category;
+      els.message.className = "message";
+
+      if (correct) {
+        combo += 1;
+        maxCombo = Math.max(maxCombo, combo);
+        const gained = 10 + Math.min(combo - 1, 5) * 2;
+        score += gained;
+        beep(true);
+        updateStatus();
+        setTimeout(() => {
+          if (running) renderItem();
+        }, 180);
+        return;
+      } else {
+        combo = 0;
+        score = Math.max(0, score - 5);
+        beep(false);
+        showAnswerFlash("오답! -5점", currentItem.explanation, false);
+        els.gameCard.classList.remove("shake");
+        void els.gameCard.offsetWidth;
+        els.gameCard.classList.add("shake");
+      }
+
+      updateStatus();
+
+      setTimeout(() => {
+        if (running) {
+          hideAnswerFlash();
+          renderItem();
+        }
+      }, 900);
+    }
+
+    function startGame() {
+      clearInterval(timerId);
+      score = 0;
+      combo = 0;
+      maxCombo = 0;
+      timeLeft = GAME_SECONDS;
+      running = true;
+      els.startOverlay.hidden = true;
+      els.endOverlay.hidden = true;
+      els.message.textContent = "";
+      hideAnswerFlash();
+      updateStatus();
+      renderItem();
+
+      timerId = setInterval(() => {
+        timeLeft -= 1;
+        updateStatus();
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame() {
+      running = false;
+      clearInterval(timerId);
+      hideAnswerFlash();
+
+      let title, text, emoji;
+      if (score >= 320) {
+        title = "분리수거 마스터";
+        text = "빠르고 정확해요. 자취 고수 인증!";
+        emoji = "🏆";
+      } else if (score >= 220) {
+        title = "생활 분리배출 고수";
+        text = "헷갈리는 품목만 조금 더 확인하면 완벽해요.";
+        emoji = "🌿";
+      } else {
+        title = "자취 새싹";
+        text = "몇 번만 더 해보면 분리수거 감각이 금방 늘어요.";
+        emoji = "🌱";
+      }
+
+      els.finalScore.textContent = score;
+      els.bestCombo.textContent = maxCombo;
+      els.resultTitle.textContent = title;
+      els.resultText.textContent = text;
+      els.resultEmoji.textContent = emoji;
+      els.endOverlay.hidden = false;
+
+      window.dispatchEvent(new CustomEvent("game:finished", {
+        detail: { score, maxCombo, duration: GAME_SECONDS }
+      }));
+    }
+
+    document.querySelectorAll(".bin").forEach(btn => {
+      btn.addEventListener("click", () => choose(btn.dataset.category));
+    });
+
+    els.startBtn.addEventListener("click", startGame);
+    els.restartBtn.addEventListener("click", startGame);
+    els.soundBtn.addEventListener("click", () => {
+      soundOn = !soundOn;
+      els.soundBtn.textContent = soundOn ? "🔊" : "🔇";
+      els.soundBtn.setAttribute("aria-label", soundOn ? "효과음 끄기" : "효과음 켜기");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      const keys = { "1":"general", "2":"plastic", "3":"paper", "4":"metalGlass", "5":"food", "6":"special" };
+      if (keys[e.key]) choose(keys[e.key]);
+    });
+  </script>
+</body>
+</html>
